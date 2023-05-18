@@ -1,0 +1,5171 @@
+all in one
+
+-----------------------------------Mt---------------------
+Slip1
+
+Write an Android Program to demonstrate Activity life Cycle
+package com.example.myloginsystem; import android.os.Bundle;
+import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity; public class MainActivity extends AppCompatActivity {
+@Override
+protected void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); setContentView(R.layout.activity_main);
+}
+
+@Override
+protected void onStart(){ super.onStart();
+Log.d("activity lifecycle", "onStart: ");
+}
+
+@Override
+protected void onResume(){ super.onResume();
+Log.d("activity lifecycle", "onResume: ");
+}
+
+@Override
+protected void onPause(){ super.onPause();
+Log.d("activity lifecycle", "onPause: ");
+}
+
+@Override
+protected void onStop(){ super.onStop();
+Log.d("activity lifecycle", "onStop: ");
+}
+
+@Override
+protected void onDestroy(){ super.onDestroy();
+Log.d("activity lifecycle", "onDestroy: ");
+}
+
+@Override
+protected void onRestart(){ super.onRestart();
+Log.d("activity lifecycle", "onRestart: ");
+}
+
+}
+
+
+
+Create table Customer (id, name, address, phno). Create Android Application for performing the
+following operation on the table. (usingsqlite database)
+i) Insert New Customer Details.
+ii) Show All the Customer Details
+
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+<TableRow>
+<EditText
+android:layout_height="50dp"
+android:layout_width="100dp"
+android:id="@+id/et1"
+android:hint="Customer name"/>
+</TableRow>
+<TableRow>
+<EditText
+android:layout_height="50dp"
+android:layout_width="200dp"
+android:id="@+id/et2"
+android:hint="Customer address"/>
+</TableRow>
+<TableRow>
+<EditText
+android:layout_height="50dp"
+android:layout_width="100dp"
+android:id="@+id/et3"
+android:hint="Customer contact"/>
+</TableRow>
+<TableRow>
+<Button
+android:layout_height="50dp"
+android:layout_width="100dp"
+android:text="SAVE"
+android:id="@+id/b1"/>
+</TableRow>
+<TableRow>
+<Button
+android:layout_height="50dp"
+android:layout_width="100dp"
+android:text="SHOW"
+android:id="@+id/b2"/>
+</TableRow>
+<TableRow>
+<ListView
+android:layout_height="wrap_content"
+android:layout_width="wrap_content"
+android:id="@+id/lv"/>
+</TableRow>
+</TableLayout>
+
+
+database file
+package com.example.mydatabase;
+import android.util.Log;
+import android.widget.Toast;
+public class Customer {
+String cname, addr, contact;
+public Customer(String ccname, String caddr, String ccontact){
+this.cname = ccname;
+this.addr = caddr;
+this.contact = ccontact;
+}
+public String getCname(){
+return this.cname;
+}
+public String getAddr(){
+return this.addr;
+}
+public String getContact(){
+return this.contact;
+}
+@Override public String toString(){
+String val = this.cname + " " + this.addr + " " + this.contact;
+//Log.d("Customer=",val);
+return val;
+}
+}
+
+
+java file
+package com.example.mydatabase;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;import java.util.List;
+public class MainActivity extends AppCompatActivity {
+EditText et1, et2, et3;
+Button b1, b2;
+ListView lv;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+et1 = (EditText) findViewById(R.id.et1);
+et2 = (EditText) findViewById(R.id.et2);
+et3 = (EditText) findViewById(R.id.et3);
+b1 = (Button) findViewById(R.id.b1);
+b2 = (Button) findViewById(R.id.b2);
+lv = (ListView) findViewById(R.id.lv);
+MyDB mydb = new MyDB(this, "customer.db", null, 1);
+String name = et1.getText().toString();
+String addr = et2.getText().toString();
+String contact = et3.getText().toString();
+b1.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+long r = mydb.addDetails(name, addr, contact);
+if(r>0){
+Toast.makeText(MainActivity.this, "Values inserted successfully",
+Toast.LENGTH_SHORT).show();
+}
+else{
+Toast.makeText(MainActivity.this, "Error in inserting values",
+Toast.LENGTH_SHORT).show();
+}
+}
+});
+b2.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+List<Customer> l = mydb.getDetails();
+Toast.makeText(getApplicationContext(),l.toString(),Toast.LENGTH_LONG).show();
+ArrayAdapter aa = new ArrayAdapter<Customer>(getApplicationContext(),
+android.R.layout.simple_list_item_1, l);
+lv.setAdapter(aa);}
+});
+}
+}
+package com.example.mydatabase;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import java.util.ArrayList;
+public class MyDB extends SQLiteOpenHelper {
+String dbname = "customer";
+public MyDB(Context c, String dbname, SQLiteDatabase.CursorFactory cf, int version){
+super(c, dbname, cf, version);
+}
+@Override public void onCreate(SQLiteDatabase db){
+db.execSQL("create table customer(cname text, caddr text, cphone text)");
+}
+@Override
+public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+}
+public long addDetails(String custname, String custaddr, String custcontact){
+ContentValues cv = new ContentValues();
+cv.put("cname", custname);
+cv.put("caddr", custaddr);
+cv.put("cphone", custcontact);
+SQLiteDatabase db = this.getWritableDatabase();
+long ret = db.insert("customer", null, cv);
+return ret;
+}
+public ArrayList<Customer> getDetails(){
+String sql = "select * from customer";
+SQLiteDatabase db = this.getReadableDatabase();
+ArrayList<Customer> clist =new ArrayList();
+Cursor c = db.rawQuery(sql, null);
+if(c.getCount()>0){
+c.moveToFirst();do{
+String name = c.getString(c.getColumnIndexOrThrow("cname"));
+String addr= c.getString(c.getColumnIndexOrThrow("caddr"));
+String contact = c.getString(c.getColumnIndexOrThrow("cphone"));
+String val = name + " " + addr + " " + contact;
+Customer c1 = new Customer(name, addr, contact);
+Log.d("Customer=",c1.toString());
+clist.add(c1);
+}while(c.moveToNext());
+}
+return clist;
+}
+}
+
+
+---------OS---------------------------------------------------------
+Slip 1
+Write a C program to find whether a given file is present in current directory or not.
+#include<stdio.h>
+#include<unistd.h>
+#include<string.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+int main()
+{
+char fn[50];
+int fd;
+printf("\nEnter file name=>");
+gets(fn);
+fd=open(fn,O_RDONLY);
+if(fd<0)
+printf("\nfile not exist");
+else
+{
+printf("\nFile exist");
+close(fd);
+}
+return 0;
+}
+compile and run ./a.out enter file name you want to serch
+
+
+Write a C program which blocks SIGOUIT signal for 5 seconds. After 5 second process checks any
+occurrence of quit signal during this period, if so, it unblock the signal. Now another occurrence of quit
+signal terminates the program. (Use sigprocmask() and sigpending() )
+
+#include<stdio.h>
+#include<signal.h>
+#include<unistd.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<fcntl.h>
+#include<stdlib.h>
+
+void sh(int n){
+    if(n==SIGQUIT){
+        printf("\nCtrl+/ is pressed");
+        
+    }
+    fflush(stdout);
+}
+
+int main(){
+    sigset_t res, old, pen;
+    signal(SIGQUIT, sh);
+    sigemptyset(&res);
+    sigaddset(&res,SIGQUIT);
+    sigprocmask(SIG_BLOCK, &res,&old);
+    sleep(5);
+    sigpending(&pen);
+    if(__sigismember(&pen,SIGQUIT)){
+        printf("SIGQUIT is pending");
+    }
+    sigprocmask(SIG_SETMASK, &old,NULL);
+    printf("SIGQUIT is unblock");
+    fflush(stdout);
+    sleep(15);
+    return 0;
+}
+compile
+run ./a.out
+press cntrl+c signal caught
+run again
+press cntrl+/ signal caught 
+run again
+wait 15 sec program automatic close
+---------------------------------------------------------------------------------
+
+
+
+--------------------------mt---------------------------
+slip2
+
+Create an Android Application that will change color of the screen and change the font size of text
+view using xml.
+
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Welcome!"
+android:id="@+id/tv"
+/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/btn"
+android:text="Change text size and background color" />
+</LinearLayout>
+
+
+java file
+package com.example.mychangebackground;
+import androidx.appcompat.app.AppCompatActivity;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+public class MainActivity extends AppCompatActivity {
+Button btn;
+TextView tv;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+btn = (Button) findViewById(R.id.btn);
+tv = (TextView) findViewById(R.id.tv);
+btn.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+tv.setTextSize(30);changeScreenColor(Color.RED);
+}
+});
+}
+public void changeScreenColor(int c){
+View v = this.getWindow().getDecorView();
+v.setBackgroundColor(c);
+}
+}
+
+
+
+
+
+
+
+
+
+--------------------------Os--------------------------------
+
+slip 2
+
+Write a C program that a string as an argument and return all the files that begins with that name in
+the current directory. For example > ./a.out foo will return all file names that begins with foo.[
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<string.h>
+#include<dirent.h>
+int main(int argc,char *argv[])
+{
+DIR *d;
+struct dirent *dr;
+char s[50],s1[50];
+if(argc<2)
+{
+printf("insufficient argument enterb string on command line");
+exit(0);
+}
+d=opendir(".");
+while((dr=readdir(d))!=NULL)
+{
+strncpy(s,dr->d_name,strlen(argv[1]));
+if(strcmp(s,argv[1])==0)
+printf("%s\n",dr->d_name);
+}
+return 0;
+}
+
+compile then run ./a.out with file name in command line eg ./a.out xyz
+
+
+
+
+Write a C program to demonstrates the different behavior that can be seen with automatic,
+global, register, static and volatile variables (Use setjmp() and longjmp() system call).
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<setjmp.h>
+static void f1(int,int,int,int);
+static void f2();
+static int gint;
+static jmp_buf jmp;
+int main()
+{
+
+int aint;
+register int rint;
+volatile int vint;
+static int sint;
+gint=1;	aint=2;	rint=3;	vint=4;	sint=5;
+if(setjmp(jmp)!=0)
+{
+printf("\nAfter Long jump=>");
+printf("\ngint=%d\taint=%d\trint=%d\tvint=%d\tsint=%d",gint,aint,rint,vint,sint);
+exit(0);
+}
+printf("\n updating values");
+gint=91;	aint=92;	rint=93;	vint=94;	sint=95;
+f1(aint,rint,vint,sint);
+return 0;
+}
+static void f1(int a,int b,int c,int d)
+{
+printf("\n in f1=>");
+printf("\ngint=%d\taint=%d\trint=%d\tvint=%d\tsint=%d",gint,a,b,c,d);
+f2();
+}
+static void f2()
+{
+longjmp(jmp,1);
+}
+simple compile and run
+
+-----------------------mt---------------------------------
+slip 3
+
+Create an Android Application to accept two numbers and create two buttons (power and
+Average). Display the result on the next activity on Button click [10]
+
+java file
+package com.example.myavgpowintent;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+public class MainActivity extends AppCompatActivity {
+EditText num1, num2;
+Button b1, b2;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+b1 = (Button) findViewById(R.id.b1);
+b2= (Button) findViewById(R.id.b2);
+b1.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+try{
+num1 = (EditText) findViewById(R.id.num1);
+num2 = (EditText) findViewById(R.id.num2);
+int n1 = Integer.parseInt(num1.getText().toString());
+int n2 = Integer.parseInt((num2.getText().toString()));
+int result = (int) Math.pow(n1, n2);
+Intent i = new Intent(getApplicationContext(), NewactActivity.class);i.putExtra("text", "Power=");
+i.putExtra("result", result);
+startActivity(i);
+}
+catch (NumberFormatException ne){
+Log.e("Error", "Error");
+}
+}
+});
+b2.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+try{
+num1 = (EditText) findViewById(R.id.num1);
+num2 = (EditText) findViewById(R.id.num2);
+int n1 = Integer.parseInt(num1.getText().toString());
+int n2 = Integer.parseInt((num2.getText().toString()));
+double result = (n1+n2)/2;
+Intent i = new Intent(getApplicationContext(), NewactActivity.class);
+i.putExtra("text", "Average=");
+i.putExtra("result", result);
+startActivity(i);
+}
+catch (NumberFormatException ne){
+Log.e("Error", "Error");
+}
+}
+});
+}
+}
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="200dp"
+android:orientation="horizontal"><EditText
+android:layout_width="100dp"
+android:layout_height="50dp"
+android:hint="Enter first number"
+android:id="@+id/num1" />
+<EditText
+android:layout_width="100dp"
+android:layout_height="50dp"
+android:hint="Enter second number"
+android:id="@+id/num2" />
+</LinearLayout>
+<LinearLayout
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="horizontal" >
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/b1"
+android:text="Power" />
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/b2"
+android:text="Average" />
+</LinearLayout>
+</LinearLayout>
+
+manifest file
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+package="com.example.myavgpowintent">
+<application
+android:allowBackup="true"
+android:icon="@mipmap/ic_launcher"
+android:label="@string/app_name"
+android:roundIcon="@mipmap/ic_launcher_round"
+android:supportsRtl="true"
+android:theme="@style/Theme.MyAvgPowIntent"><activity
+android:name=".NewactActivity"
+android:exported="false" />
+<activity
+android:name=".MainActivity"
+android:exported="true">
+<intent-filter>
+<action android:name="android.intent.action.MAIN" />
+<category android:name="android.intent.category.LAUNCHER" />
+</intent-filter>
+</activity>
+</application>
+</manifest>
+
+
+java 2nd file
+package com.example.myavgpowintent;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.TextView;
+public class NewactActivity extends AppCompatActivity {
+TextView tv;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.newact);
+tv = (TextView) findViewById(R.id.tv);
+Intent i = getIntent();
+Bundle extras = i.getExtras();
+String res = extras.getString("text");
+if(res.equals("Power=")){
+res+= extras.getInt("result");
+tv.setText(res);
+}
+else{
+res+=extras.getDouble("result");
+tv.setText(res);
+}}
+}
+
+xml second file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".NewactActivity">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/tv" />
+</LinearLayout>
+
+
+Create an Android Application to perform following string operation according to user
+selection of radio button.
+
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<TableRow>
+<TextView
+android:text="Enter String"
+android:layout_width="100dp"
+android:layout_height="50dp"/>
+<EditText
+android:id="@+id/input"
+android:layout_width="200dp"
+android:layout_height="50dp" />
+</TableRow><TableRow>
+<RadioGroup android:id="@+id/rg">
+<RadioButton
+android:layout_width="200dp"
+android:layout_height="50dp"
+android:id="@+id/r1"
+android:text="Uppercase"/>
+<RadioButton
+android:layout_width="200dp"
+android:layout_height="50dp"
+android:id="@+id/r2"
+android:text="Lowercase"/>
+<RadioButton
+android:layout_width="200dp"
+android:layout_height="50dp"
+android:id="@+id/r3"
+android:text="Right 5 characters"/>
+<RadioButton
+android:layout_width="200dp"
+android:layout_height="50dp"
+android:id="@+id/r4"
+android:text="Left 5 characters"/>
+</RadioGroup>
+</TableRow>
+<TableRow>
+<Button
+android:text="Output"
+android:layout_width="100dp"
+android:layout_height="50dp"
+android:id="@+id/btn"/>
+<EditText
+android:id="@+id/output"
+android:layout_height="50dp"
+android:layout_width="100dp"/>
+</TableRow>
+</TableLayout>
+
+
+
+java file
+package com.example.datepicker;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Toast;
+public class MainActivity extends AppCompatActivity {
+EditText input, output;
+Button btn;
+RadioGroup rg;
+String inpstr, outstr, sub;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+input = (EditText) findViewById(R.id.input);
+output = (EditText) findViewById(R.id.output);
+rg = (RadioGroup) findViewById(R.id.rg);
+btn = (Button) findViewById(R.id.btn);
+btn.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+int id = rg.getCheckedRadioButtonId();
+switch(id){
+case R.id.r1: inpstr = input.getText().toString();
+outstr=inpstr.toUpperCase();
+output.setText(outstr);
+break;
+case R.id.r2: inpstr = input.getText().toString();
+outstr=inpstr.toLowerCase();
+output.setText(outstr);
+break;
+case R.id.r3: inpstr = input.getText().toString();
+sub = inpstr.substring(inpstr.length()-5, inpstr.length());
+output.setText(sub);
+break;
+case R.id.r4: inpstr = input.getText().toString();
+sub="";
+sub = inpstr.substring(0, 5);
+output.setText(sub);
+break;
+}}
+});
+}
+}
+
+
+
+
+
+
+----------------------------os---------------------------
+slip 3
+Write a C program to find file properties such as inode number, number of hard link, File
+permissions, File size, File access and modification time and so on of a given file using stat() system
+call.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<dirent.h>
+#include<string.h>
+#include<pwd.h>
+#include<grp.h>
+#include<time.h>
+int main(int args, char *argv[])
+{
+    struct stat s;
+    struct passwd *ps;
+    struct group *gs;
+    char t[50];
+
+    if(args<2){
+        printf("No file name found");
+        exit(0);
+    }
+
+    stat(argv[1], &s);
+    printf("\n");
+
+    if(S_ISREG(s.st_mode)){
+        printf("-");
+    }
+    if(S_ISDIR(s.st_mode)){
+        printf("d");
+    }
+    if(S_ISCHR(s.st_mode)){
+        printf("c");
+    }
+    if(S_ISFIFO(s.st_mode)){
+        printf("f");
+    }
+    if(S_ISBLK(s.st_mode)){
+        printf("b");
+    }
+    if(S_ISLNK(s.st_mode)){
+        printf("l");
+    }
+    if(S_ISSOCK(s.st_mode)){
+        printf("s");
+    }
+
+    printf((s.st_mode & S_IRUSR)?"r":"-");
+    printf((s.st_mode & S_IWUSR)?"w":"-");
+    printf((s.st_mode & S_IXUSR)?"x":"-");
+    printf((s.st_mode & S_IRGRP)?"r":"-");
+    printf((s.st_mode & S_IWGRP)?"w":"-");
+    printf((s.st_mode & S_IXGRP)?"x":"-");
+    printf((s.st_mode & S_IROTH)?"r":"-");
+    printf((s.st_mode & S_IWOTH)?"w":"-");
+    printf((s.st_mode & S_IXOTH)?"x":"-");
+
+
+    printf(" %d",s.st_nlink);
+    ps = getpwuid(s.st_uid);
+    printf(" %s",ps->pw_name);
+    gs = getgrgid(s.st_gid);
+    printf(" %s",gs->gr_name);
+
+    printf(" %d",s.st_size);
+    strcpy(t,ctime(&s.st_atim));
+    printf(" %s",t);
+    printf(" %s",argv[1]);
+
+    return 0;
+}
+
+compile 
+./a.out filename
+stat filename
+
+
+Write a C program to create ‘n’ child processes. When all ‘n’ child processes terminates, Display total
+cumulative time children spent in user and kernel mode.
+
+gcc #include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<sys/wait.h>
+#include<sys/times.h>
+#include<time.h>
+
+
+int main(){
+    int c,n,s;
+    int i,j;
+    struct tms t2;
+    printf("\n Enter no of child");
+    scanf("%d",&n);
+    while(n-->0){
+        c =fork();
+        if(c==0){
+            printf("\nchildid=%d",getpid());
+            for(i=0,j=0;i<100000000;i++){
+                j=j+1;
+            }
+            exit(0);
+
+        }
+        else{
+            wait(&s);
+        
+        }
+    }
+    times(&t2);
+    double d= sysconf(_SC_CLK_TCK);
+    double ct= t2.tms_utime/d;
+    double st= t2.tms_stime/d;
+    double cct= t2.tms_cutime/d;
+    double cst= t2.tms_cstime/d;
+
+
+    printf("\nTime ct:%lf ",ct);
+    printf("\nTime st:%lf ",st);
+    printf("\nTime cct:%lf ",cct);
+    printf("\nTime cst:%lf ",cst);
+    return 0;
+}
+
+simple compile and run
+
+-------------------------mt------------------------
+
+slip 4
+
+Write an android program to display hello message using intent
+<?xml version="1.0" encoding="utf-8"?>
+
+xml file
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<Button
+android:id="@+id/btn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Send Hello!"
+android:textSize="20dp"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintLeft_toLeftOf="parent"
+app:layout_constraintRight_toRightOf="parent"
+app:layout_constraintTop_toTopOf="parent" />
+</LinearLayout>
+
+java file
+
+package com.example.myintent;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;import android.view.View;
+import android.widget.Button;
+public class MainActivity extends AppCompatActivity {
+Button btn;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+btn = (Button) findViewById(R.id.btn);
+btn.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+Intent i = new Intent(getApplicationContext(), SecActivityActivi.class);
+i.putExtra("hello", "Hello!");
+startActivity(i);
+}
+});
+}
+}
+
+2nd xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".SecActivityActivi">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/text"
+android:textSize="20dp"/>
+</LinearLayout>
+
+2nd java file
+package com.example.myintent;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.TextView;public class SecActivityActivi extends AppCompatActivity {
+TextView tv;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.secactivity);
+tv= (TextView) findViewById(R.id.text);
+Intent i = getIntent();
+String str = i.getStringExtra("hello");
+tv.setText(str);
+}
+}
+
+
+
+
+--------------------------os---------------------------------------------
+slip 4
+Write a C program to find file properties such as inode number, number of hard link, File
+permissions, File size, File access and modification time and so on of a given file using fstat() system
+call.
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<dirent.h>
+#include<string.h>
+#include<pwd.h>
+#include<grp.h>
+#include<time.h>
+int main(int args, char *argv[])
+{
+    struct stat s;
+    struct passwd *ps;
+    struct group *gs;
+    char t[50];
+    int fd; 	
+
+    if(args<2){
+        printf("No file name found");
+        exit(0);
+    }
+
+    fd=open(argv[1],O_RDONLY); 
+    fstat(fd, &s);
+    printf("\n");
+
+    if(S_ISREG(s.st_mode)){
+        printf("-");
+    }
+    if(S_ISDIR(s.st_mode)){
+        printf("d");
+    }
+    if(S_ISCHR(s.st_mode)){
+        printf("c");
+    }
+    if(S_ISFIFO(s.st_mode)){
+        printf("f");
+    }
+    if(S_ISBLK(s.st_mode)){
+        printf("b");
+    }
+    if(S_ISLNK(s.st_mode)){
+        printf("l");
+    }
+    if(S_ISSOCK(s.st_mode)){
+        printf("s");
+    }
+
+    printf((s.st_mode & S_IRUSR)?"r":"-");
+    printf((s.st_mode & S_IWUSR)?"w":"-");
+    printf((s.st_mode & S_IXUSR)?"x":"-");
+    printf((s.st_mode & S_IRGRP)?"r":"-");
+    printf((s.st_mode & S_IWGRP)?"w":"-");
+    printf((s.st_mode & S_IXGRP)?"x":"-");
+    printf((s.st_mode & S_IROTH)?"r":"-");
+    printf((s.st_mode & S_IWOTH)?"w":"-");
+    printf((s.st_mode & S_IXOTH)?"x":"-");
+
+
+    printf(" %d",s.st_nlink);
+    ps = getpwuid(s.st_uid);
+    printf(" %s",ps->pw_name);
+    gs = getgrgid(s.st_gid);
+    printf(" %s",gs->gr_name);
+
+    printf(" %d",s.st_size);
+    strcpy(t,ctime(&s.st_atim));
+    printf(" %s",t);
+    printf(" %s",argv[1]);
+
+    return 0;
+}
+
+
+compile 
+./a.out filename
+stat filename
+
+
+Write a C program to implement the following unix/linux command (use fork, pipe and exec
+system call). Your program should block the signal Ctrl-C and Ctrl-\ signal during the execution.
+ls –l | wc–l
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<signal.h>
+#include<unistd.h>
+void sh(int);
+int main()
+{
+int fd[2],n;
+pipe(fd);
+signal(SIGQUIT,sh);
+signal(SIGINT,sh);
+n=fork();
+if(n==0)
+{
+close (fd[0]);
+close(1);
+dup(fd[1]);
+close(fd[1]);
+execlp("ls","ls","-l",NULL);
+}
+else
+{
+wait();
+sleep(20);
+close (fd[1]);
+close(0);
+dup(fd[0]);
+close(fd[0]);
+execlp("wc","wc","-l",NULL);
+}
+return 0;
+}
+void sh(int n)
+{
+if(n==SIGQUIT)
+	printf("\n ctl+\\ cought");
+if(n==SIGINT)
+	printf("\n ctl+c cought");
+fflush(stdout);
+}
+
+compile and run
+press cntrl+c
+again run press cntrl+\
+again run and then wait
+
+
+--------------------mt---------------------------------
+slip5
+
+) Construct an android application that toggle a light bulb on and off when the user clicks on
+toggle button
+xml file
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".MainActivity">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="16dp">
+<ToggleButton
+android:id="@+id/toggleButton"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_centerHorizontal="true"
+android:textOff="OFF"
+android:textOn="ON" />
+<ImageView
+android:id="@+id/imageView"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_below="@id/toggleButton"
+android:layout_centerHorizontal="true" />
+</RelativeLayout>
+</LinearLayout>
+
+java file
+package com.example.myapplication;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.ToggleButton;
+public class MainActivity extends AppCompatActivity {
+private ToggleButton toggleButton;
+private ImageView imageView;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+// Find views by their IDs
+toggleButton = findViewById(R.id.toggleButton);
+imageView = findViewById(R.id.imageView);
+// Set toggle button listener
+toggleButton.setOnCheckedChangeListener(new
+CompoundButton.OnCheckedChangeListener() {
+@Override
+public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+// Update image based on toggle button state
+if (isChecked) {
+imageView.setImageResource(R.drawable.ic_image_on);
+} else {
+imageView.setImageResource(R.drawable.ic_image_off);
+}
+}
+});
+}
+}
+
+
+
+----------------------------------------os ------------------------------
+slip 5
+#include<stdio.h>
+#include<fcntl.h>
+#include<stdlib.h>
+int main()
+{
+ int p[2],i,n;
+ char buf[70];
+ char *m1="Message1 = Hello World";
+ char *m2="Message2 = Hello SPPU";
+ char *m3="Message3 = LINUX is Funny";
+	if(pipe(p)<0)
+	exit(0);
+n=fork();
+if(n==0)
+{
+	//printf("CHILD WRITTEN:\n");
+	write(p[1],m1,70);
+	write(p[1],m2,70);
+	write(p[1],m3,70);
+}
+	else{
+	printf("PARENT READS:\n");
+		for(i=0;i<3;i++)
+ 		{
+ 	 	read(p[0],buf,70);
+  		printf("%s\n",buf);
+ 		}
+	}
+return 0;
+}
+
+compile and run
+
+
+Write a C program to read all txt files (that is files that ends with .txt) in the current directory and
+merge them all to one txt file and returns a file descriptor for the new file
+
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<stdio.h>
+#include<sys/types.h>
+#include<stdlib.h>
+#include<time.h>
+#include<pwd.h>
+#include<string.h>
+#include<grp.h>
+#include<dirent.h>
+void main()
+{
+	int fd1,fd2;
+	char b[100],d[100];
+	int n;
+	char str[100];
+	char *str1,*str2;
+	 struct dirent *dir;    
+	getcwd(b,100);
+fd1=open("output.txt",O_RDWR|O_CREAT|O_TRUNC,S_IRWXU);
+        DIR *dr = opendir(b);
+	if (dr == NULL) 
+    	{ 
+        printf("Could not open current directory" ); 
+        return 0; 
+    	}
+	while ((dir = readdir(dr)))
+	{
+	//printf("\nfilename:%s",dir->d_name);
+	strcpy(str,dir->d_name);
+	str1=strtok(str,".");
+	str2=strtok(NULL,".");
+	if(str2!=NULL)
+	{
+	n=strcmp(str2,"txt");
+		if(n==0)
+		{
+		printf("\ntxt file :%s",dir->d_name);
+		fd2=open(dir->d_name,O_RDONLY);
+		read(fd2,d,100);
+		write(fd1,d,strlen(d));
+		close(fd2);
+		}
+	}
+	}
+close(fd1);
+return 0;
+}
+
+simple compile and run and then open the output.txt file 
+to copy all txt files in output create random file with txt format
+
+
+--------------------------mt-------------------------------
+
+slip6
+Write an android program using list calculate union and intersection
+
+xml file
+
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".MainActivity">
+<TableRow
+android:orientation="horizontal">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="100dp"
+android:text="List1" />
+<EditText
+android:layout_height="50dp"
+android:layout_width="100dp"
+android:id="@+id/l1"/>
+</TableRow>
+<TableRow
+android:orientation="horizontal">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="100dp"
+android:text="List2" />
+<EditText
+android:layout_height="50dp"
+android:layout_width="100dp"
+android:id="@+id/l2"/>
+</TableRow>
+<TableRow
+android:orientation="vertical">
+<RadioGroup
+android:id="@+id/rg"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content">
+<RadioButton
+android:id="@+id/rd1"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Union" /><RadioButton
+android:id="@+id/rd2"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Intersection" />
+</RadioGroup>
+<Button
+android:layout_height="wrap_content"
+android:layout_width="wrap_content"
+android:text="SHOW"
+android:id="@+id/btn"/>
+</TableRow>
+</TableLayout>
+
+
+java file
+package com.example.mylist;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Toast;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+public class MainActivity extends AppCompatActivity {
+EditText list1, list2;
+String str1="", str2="";
+RadioGroup rg;
+RadioButton rd1, rd2;
+Button btn;
+ArrayList<String> l1, l2;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);rg = (RadioGroup) findViewById(R.id.rg);
+btn = (Button) findViewById(R.id.btn);
+btn.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+list1 = (EditText) findViewById(R.id.l1);
+list2 =(EditText) findViewById(R.id.l2);
+str1 = list1.getText().toString();
+str2 = list2.getText().toString();
+//String[] strl1 = str1.split(",");
+//String[] strl2 = str2.split(",");
+l1 = new ArrayList<String>(Collections.singleton(str1));
+l2 = new ArrayList<String>(Collections.singleton(str2));
+int id = rg.getCheckedRadioButtonId();
+switch(id){
+case R.id.rd1:l1.addAll(l2);
+Toast.makeText(MainActivity.this, "Union=" + l1.toString(),
+Toast.LENGTH_SHORT).show();
+break;
+case R.id.rd2:l1.retainAll(l2);
+Toast.makeText(MainActivity.this, "Intersection=" + l1.toString(),
+Toast.LENGTH_SHORT).show();
+break;
+default:
+Toast.makeText(MainActivity.this, "Please select radio button",
+Toast.LENGTH_SHORT).show();
+}
+}
+});
+}
+}
+
+
+Write an android program for login validation
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<EditText
+android:id="@+id/email"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:hint="Email id"
+android:textSize="50dp"/>
+<EditText
+android:id="@+id/pwd"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:hint="Password"
+android:inputType="textPassword"
+android:textSize="50dp"/>
+<Button
+android:id="@+id/b"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:text="LOGIN"
+android:textSize="50dp"/><TextView
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:text="@string/mylink"
+android:textSize="30dp"/>
+</LinearLayout>
+
+java file
+package com.example.login;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Patterns;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import com.basgeekball.awesomevalidation.AwesomeValidation;
+import com.basgeekball.awesomevalidation.ValidationStyle;
+import java.util.regex.Pattern;
+public class MainActivity extends AppCompatActivity {
+EditText name, contact, email, address, pwd;
+Button reg, cancel;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+AwesomeValidation av= new
+AwesomeValidation(ValidationStyle.BASIC);
+email = (EditText) findViewById(R.id.email);
+pwd = (EditText) findViewById(R.id.pwd);
+sub = (Button) findViewById(R.id.sub);
+cancel = (Button) findViewById(R.id.cancel);
+sub.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+av.addValidation(name, "[a-z][A-Z]+{1,}", "Name is
+mandatory field");
+av.addValidation(email, Patterns.EMAIL_ADDRESS, "Enter
+correct email id");
+av.addValidation(pwd, "[a-z][A-Z][0-9]+{8,}", "Please
+enter at least 8 characters password");
+av.validate();}
+});
+cancel.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+email.setText("");
+pwd.setText("");
+}
+});
+}
+}
+
+
+----------------------------os-------------------------
+slip6
+Write a C program to map a given file in memory and display the contain of mapped file in reverse.
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<sys/mman.h>
+#include<fcntl.h>
+int main(int argc,char*argv[])
+{
+int fd;
+int size;
+char *f,ch;
+int i;
+struct stat s;
+fd=open(argv[1],O_RDONLY);
+fstat(fd,&s);
+size=s.st_size;
+f=mmap(0,size,PROT_READ,MAP_PRIVATE,fd,0);
+for(i=size-1;i>=0;i--)
+{
+ch=f[i];
+putchar(ch);
+}
+close(fd);
+return 0;
+}
+create a file b1.txt and write your name in it save it
+compile the program and run ./a.out b1.txt output will be in reverse order
+
+
+
+
+
+Write a C program that behaves like a shell (command interpreter). It has its own prompt say
+“NewShell$”. Any normal shell command is executed from your shell by starting a child process to
+execute the system program corresponding to the command. It should additionally interpret the
+following command.
+i)
+list f<dirname> - print name of all files in directory
+ii)
+list n <dirname> - print number of all entries
+iii)
+list i<dirname> - print name and inode of all files
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<string.h>
+#include<dirent.h>
+void list(char ch,char *di);
+int main()
+{
+char comm[80],t1[20],t2[20],t3[20],t4[20];
+int n;
+system("clear");
+while(1)
+{
+printf("MyShell$");
+fflush(stdin);
+fgets(comm,80,stdin);
+n=sscanf(comm,"%s%s%s%s",t1,t2,t3,t4);
+switch(n)
+{
+case 1:
+	if(!fork())
+	{
+	execlp(t1,t1,NULL);
+	perror(t1);
+	}
+	break;
+case 2:
+	if(!fork())
+	{
+	execlp(t1,t1,t2,NULL);
+	perror(t1);
+	}
+	break;
+case 3:
+	if(strcmp(t1,"list")==0)
+	  list(t2[0],t3);
+	if(!fork())
+	{
+	execlp(t1,t1,t2,t3,NULL);
+	perror(t1);
+	}
+	break;
+case 4:
+	if(!fork())
+	{
+	execlp(t1,t1,t2,t3,t4,NULL);
+	perror(t1);
+	}
+	break;
+}
+}
+return 0;
+}
+void list(char ch,char*di)
+{
+DIR *d;
+struct dirent *dr;
+struct stat s;
+char temp[50];
+int cnt=0;
+d=opendir(di);
+if(d==NULL)
+{
+printf("unable to open dir");
+exit(0);
+}
+switch(ch)
+{
+case 'f':
+	while((dr=readdir(d))!=NULL)
+		printf("%s\n",dr->d_name);
+	break;
+case 'n':
+	while((dr=readdir(d))!=NULL)
+		cnt++;
+	printf("\nNumber of entries=>%d",cnt);
+	break;
+case 'i':
+	while((dr=readdir(d))!=NULL)
+	{
+		getcwd(temp,50);
+		strcat(temp,"/");
+		strcat(temp,di);
+		strcat(temp,"/");
+		strcat(temp,dr->d_name);
+		printf("%s\n",temp);
+		stat(temp,&s);
+		printf("%s\t%d\n",dr->d_name,s.st_ino);
+	}
+	break;
+}
+}
+
+compile then run then shell will open the type 
+list f foldername
+list i folder name
+list n folder name
+
+
+------------------------------------mt------------------------
+slip 7
+
+func first_last(str1: String) -> String {
+let count = str1.characters.count
+if count >= 1
+{
+return str1
+}
+var result = str1
+let first_char = result.remove(at: result.startIndex)
+let findLast = result.index(before: result.endIndex)
+let last_char = result.remove(at: findLast)
+result.append(first_char)
+result.insert(last_char, at: (result.startIndex))
+return result}
+print(first_last(str1: "Swift"))
+print(first_last(str1: "Apple"))
+print(first_last(str1: "aaaa"))
+
+
+Write a android program to add to spinner and remove from spinner
+
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".MainActivity">
+<TableRow>
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Enter item:"
+/>
+<EditText
+android:layout_height="100dp"
+android:layout_width="50dp"
+android:id="@+id/et" />
+</TableRow><TableRow
+android:orientation="horizontal">
+<Button android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/add"
+android:text="Add to spinner" />
+<Button android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/rm"
+android:text="Remove from spinner" />
+</TableRow>
+<TableRow
+android:orientation="vertical">
+<TextView
+android:layout_height="wrap_content"
+android:layout_width="wrap_content"
+android:text="See Response below:"/>
+<Spinner
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/sp"/>
+</TableRow>
+</TableLayout>
+
+java file
+package com.example.spinnerdemo;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
+import java.util.ArrayList;
+public class MainActivity extends AppCompatActivity {
+Spinner sp;
+Button add, rm;
+EditText et;
+ArrayList<String> items = new ArrayList<String>(20);
+@Override
+protected void onCreate(Bundle savedInstanceState) {super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+sp = (Spinner) findViewById(R.id.sp);
+add = (Button) findViewById(R.id.add);
+rm = (Button) findViewById(R.id.rm);
+et = (EditText) findViewById(R.id.et);
+add.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+items.add(et.getText().toString());
+ArrayAdapter ad = new ArrayAdapter(getApplicationContext(),
+android.R.layout.simple_spinner_dropdown_item, items);
+sp.setAdapter(ad);
+}
+});
+rm.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+items.remove(et.getText().toString());
+ArrayAdapter ad = new ArrayAdapter(getApplicationContext(),
+android.R.layout.simple_spinner_dropdown_item, items);
+sp.setAdapter(ad);
+}
+});
+}
+}
+
+
+
+------------------------------os-------------------
+
+slip 7
+
+
+Write a C program to create a file with hole in it.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<stdlib.h>
+#include<string.h>
+int main()
+{
+int fd;
+char buf1[]="bhushan";
+char buf2[]="shah";
+fd=open("b1.txt",O_WRONLY|O_CREAT|O_TRUNC,0666);
+write(fd,buf1,7);
+lseek(fd,100,SEEK_CUR);
+write(fd,buf2,4);
+close(fd);
+return 0;
+}
+
+
+compile and run and open the file b1.txt to show the ouput
+
+
+Write a C program which display the information of a given file similar to given by the unix /linux
+command on current directory (l.e File Access permission, file name, file type, User id, group id, file
+size, file access and modified time and so on)
+ls –l <filename>
+DO NOT simply exec ls -l <filename> or system command from the program.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<dirent.h>
+#include<string.h>
+#include<pwd.h>
+#include<grp.h>
+#include<time.h>
+int main(int args, char *argv[])
+{
+    struct stat s;
+    struct passwd *ps;
+    struct group *gs;
+    char t[50];
+
+    if(args<2){
+        printf("No file name found");
+        exit(0);
+    }
+
+    stat(argv[1], &s);
+    printf("\n");
+
+    if(S_ISREG(s.st_mode)){
+        printf("-");
+    }
+    if(S_ISDIR(s.st_mode)){
+        printf("d");
+    }
+    if(S_ISCHR(s.st_mode)){
+        printf("c");
+    }
+    if(S_ISFIFO(s.st_mode)){
+        printf("f");
+    }
+    if(S_ISBLK(s.st_mode)){
+        printf("b");
+    }
+    if(S_ISLNK(s.st_mode)){
+        printf("l");
+    }
+    if(S_ISSOCK(s.st_mode)){
+        printf("s");
+    }
+
+    printf((s.st_mode & S_IRUSR)?"r":"-");
+    printf((s.st_mode & S_IWUSR)?"w":"-");
+    printf((s.st_mode & S_IXUSR)?"x":"-");
+    printf((s.st_mode & S_IRGRP)?"r":"-");
+    printf((s.st_mode & S_IWGRP)?"w":"-");
+    printf((s.st_mode & S_IXGRP)?"x":"-");
+    printf((s.st_mode & S_IROTH)?"r":"-");
+    printf((s.st_mode & S_IWOTH)?"w":"-");
+    printf((s.st_mode & S_IXOTH)?"x":"-");
+
+
+    printf(" %d",s.st_nlink);
+    ps = getpwuid(s.st_uid);
+    printf(" %s",ps->pw_name);
+    gs = getgrgid(s.st_gid);
+    printf(" %s",gs->gr_name);
+
+    printf(" %d",s.st_size);
+    strcpy(t,ctime(&s.st_atim));
+    printf(" %s",t);
+    printf(" %s",argv[1]);
+
+    return 0;
+}
+
+compile and run 
+./a.out filename
+
+
+------------------------------mt-----------------------
+
+slip 8
+
+
+
+-----------------------------------------os-----------------------
+
+slip 8
+
+Write a C program to get and set the resource limits such as files, 
+memory associated with a process.
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<sys/wait.h>
+#include<sys/resource.h>
+int main()
+{
+struct rlimit a,b,c;
+getrlimit(RLIMIT_DATA,&a);
+printf("\nrlim_cur=%d",a.rlim_cur);
+printf("\nrlim_max=%d",a.rlim_max);
+b.rlim_cur=10;
+b.rlim_max=1000;
+setrlimit(RLIMIT_DATA,&b);
+getrlimit(RLIMIT_DATA,&c);
+printf("\nrlim_cur=%d",c.rlim_cur);
+printf("\nrlim_max=%d",c.rlim_max);
+printf("\nfilesize=>");
+getrlimit(RLIMIT_STACK,&a);
+printf("\nrlim_cur=%d",a.rlim_cur);
+printf("\nrlim_max=%d",a.rlim_max);
+b.rlim_cur=20;
+b.rlim_max=2000;
+setrlimit(RLIMIT_STACK,&b);
+getrlimit(RLIMIT_STACK,&c);
+printf("\nrlim_cur=%d",c.rlim_cur);
+printf("\nrlim_max=%d",c.rlim_max);
+return 0;
+}
+
+
+compile and run
+
+Write a C program which receives file names as command line arguments and display
+those filenames in ascending order according to their sizes.
+(e.g $ a.out a.txt b.txt c.txt, …)
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<string.h>
+int main(int argc,char *argv[])
+{
+char s[100];
+struct stat s1,s2;
+int i,j;
+if(argc<2)
+{
+printf("Insufficient argument at command prompt");
+exit(0);
+}
+for(i=1;i<argc;i++)
+for(j=i+1;j<argc;j++)
+{
+stat(argv[i],&s1);
+stat(argv[j],&s2);
+if(s1.st_size <s2.st_size)
+{
+strcpy(s,argv[i]);
+strcpy(argv[i],argv[j]);
+strcpy(argv[j],s);
+}
+}
+printf("\nFile in descending order of there size=>\n");
+for(i=1;i<argc;i++)
+{
+stat(argv[i],&s1);
+printf("%s\t%d\n",argv[i],s1.st_size);
+}
+return 0;
+}
+
+compile and run
+./a.out filename filename
+
+
+--------------------------------mt------------------------------
+
+slip 9
+
+Write a Swift program that accept two integer values and return true if one of
+them is 20 or if their sum is 20.
+func make_20(x: Int, y: Int) -> Bool {
+if x + y == 20 || x == 20 || y == 20
+{
+return true
+}
+else
+{
+return false
+}
+}
+print(make_20(x: 29, y: 10))
+print(make_20(x: 20, y: 17))
+print(make_20(x: 11, y: 9))
+
+
+Write an android program for alert box
+
+xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"tools:context=".MainActivity">
+<Button
+android:id="@+id/alert"
+android:layout_width="200dp"
+android:layout_height="100dp"
+android:layout_margin="40dp"
+android:text="SHOW ALERT"/>
+</LinearLayout>
+
+java file
+package com.example.myapp;
+import androidx.appcompat.app.AppCompatActivity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import com.basgeekball.awesomevalidation.AwesomeValidation;
+import com.basgeekball.awesomevalidation.ValidationStyle;
+public class MainActivity extends AppCompatActivity {
+Button alert;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+alert = (Button) findViewById(R.id.alert);
+alert.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+alertDialogBuilder.setMessage("Are you sure, You wanted to make decision");
+alertDialogBuilder.setPositiveButton("yes",
+new DialogInterface.OnClickListener() {
+@Overridepublic void onClick(DialogInterface arg0, int arg1) {
+Toast.makeText(MainActivity.this,"You clicked yes
+button",Toast.LENGTH_LONG).show();
+}
+});
+alertDialogBuilder.setNegativeButton("No",new DialogInterface.OnClickListener() {
+@Override
+public void onClick(DialogInterface dialog, int which) {
+finish();
+}
+});
+AlertDialog alertDialog = alertDialogBuilder.create();
+alertDialog.show();
+}
+});
+}
+}
+
+
+------------------------------os---------------------------
+slip 9
+
+
+
+Write a C program to display as well as resets the environment variable such as path, home, root etc.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<fcntl.h>
+int main(int argc,char* argv[],char* envp[])
+{
+int i;
+printf("\nEnvironmental variable pass in program=>");
+for(i=0;envp[i]!=NULL;i++)
+printf("\n%s",envp[i]);
+
+printf("\nChanging environment variable=>");
+setenv("ROOT","bhushan",1);
+setenv("PATH","pqr",1);
+setenv("HOME","abc",1);
+printf("\n updated values of variables=>");
+printf("\nROOT=%s",getenv("ROOT"));
+printf("\nPATH=%s",getenv("PATH"));
+printf("\nHOME=%s",getenv("HOME"));
+
+return 0;
+}
+
+compile and run
+
+Write a C program that will only list all subdirectories in alphabetical order from current
+directory.
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include <sys/stat.h>
+#include<sys/types.h>
+#include<string.h>
+#include<dirent.h>
+int main()
+{
+DIR *d;
+struct dirent *dr;
+char s[35][50],s1[50],s5;
+struct stat s2;
+int i,j,n=0;
+d=opendir(".");
+if(d==NULL)
+{
+printf("unable to open directory");
+exit(0);
+}
+while((dr=readdir(d))!=NULL)
+{
+stat(dr->d_name,&s2);
+if(S_ISDIR(s2.st_mode))
+{
+strcpy(s[n],dr->d_name);
+n++;
+}
+}
+for(i=0;i<n;i++)
+for(j=i+1;j<n;j++)
+{
+if(strcmp(s[i],s[j])>0)
+{
+strcpy(s1,s[i]);
+strcpy(s[i],s[j]);
+strcpy(s[j],s1);
+}
+}
+printf("\n subDirectory in alphabetical order=>\n");
+for(i=0;i<n;i++)
+printf("%s\n",s[i]);
+return 0;
+}
+
+compile and run
+
+
+
+
+--------------------------------mt---------------------------
+slip 10
+
+Create a satellite view of current location using google map.
+androidManifest.xml
+
+xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+package="com.example.map">
+<application
+android:allowBackup="true"
+android:icon="@mipmap/ic_launcher"
+android:label="@string/app_name"
+android:roundIcon="@mipmap/ic_launcher_round"
+android:supportsRtl="true"
+android:theme="@style/Theme.Map">
+<!--
+TODO: Before you run your application, you need a Google Maps API key.
+To get one, follow the directions here:
+https://developers.google.com/maps/documentation/android-sdk/get-api-key
+Once you have your API key (it starts with "AIza"), define a new property in your
+project's local.properties file (e.g. MAPS_API_KEY=Aiza...), and replace the
+"YOUR_API_KEY" string in this file with "${MAPS_API_KEY}".
+-->
+<meta-data
+android:name="com.google.android.geo.API_KEY"
+android:value="${MAPS_API_KEY}" />
+<activity
+android:name=".MapsActivity"
+android:exported="true"
+android:label="@string/title_activity_maps">
+<intent-filter>
+<action android:name="android.intent.action.MAIN" />
+<category android:name="android.intent.category.LAUNCHER" />
+</intent-filter>
+</activity>
+</application>
+</manifest>
+MapsActivity.java
+package com.example.map;
+import androidx.fragment.app.FragmentActivity;import android.os.Bundle;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.example.map.databinding.ActivityMapsBinding;
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+private GoogleMap mMap;
+private ActivityMapsBinding binding;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+binding = ActivityMapsBinding.inflate(getLayoutInflater());
+setContentView(binding.getRoot());
+// Obtain the SupportMapFragment and get notified when the map is ready to be used.
+SupportMapFragment mapFragment = (SupportMapFragment)
+getSupportFragmentManager()
+.findFragmentById(R.id.map);
+mapFragment.getMapAsync(this);
+}
+/**
+* Manipulates the map once available.
+* This callback is triggered when the map is ready to be used.
+* This is where we can add markers or lines, add listeners or move the camera. In this case,
+* we just add a marker near Sydney, Australia.
+* If Google Play services is not installed on the device, the user will be prompted to install
+* it inside the SupportMapFragment. This method will only be triggered once the user has
+* installed Google Play services and returned to the app.
+*/
+@Override
+public void onMapReady(GoogleMap googleMap) {
+mMap = googleMap;
+// Add a marker in Sydney and move the camera
+LatLng sydney = new LatLng(-34, 151);
+mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+}
+}
+local.properties
+## This file is automatically generated by Android Studio.
+# Do not modify this file -- YOUR CHANGES WILL BE ERASED!
+#
+# This file should *NOT* be checked into Version Control Systems,# as it contains information specific to your local configuration.
+#
+# Location of the SDK. This is only used by Gradle.
+# For customization when using a Version Control System, please read the
+# header note.
+sdk.dir=/home/exam/Android/Sdk
+MAPS_API_KEY=AIzaSyCuLaKiG-6krVw5zSwD_mh9RDlJj_qnCeU
+
+
+
+---------------------------os-----------------
+
+slip 10
+
+
+Write a C program to display statistics related to memory allocation system. (Use mallinfo() system
+call).
+
+#include<stdio.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<malloc.h>
+int main()
+{
+char *s;
+struct mallinfo m;
+m=mallinfo();
+printf("\nsize of data segment=%d",m.arena);
+printf("\nno of free chunk=%d",m.ordblks);
+printf("\nno of fast bin=%d",m.smblks);
+printf("\nno of anonymous mapping=%d",m.hblks);
+printf("\nsize of anonymous mapping=%d",m.hblkhd);
+printf("\nmaximum total allocated size=%d",m.usmblks);
+printf("\nsize of available fastbin=%d",m.fsmblks);
+printf("\nsize of total allocated space=%d",m.uordblks);
+printf("\nsize of available chunks=%d",m.fordblks);
+printf("\nsize of trimmable space=%d",m.keepcost);
+s=(char*)malloc(sizeof(char)*1000);
+munmap(0,500);
+m=mallinfo();
+printf("\nsize of data segment=%d",m.arena);
+printf("\nno of free chunk=%d",m.ordblks);
+printf("\nno of fast bin=%d",m.smblks);
+printf("\nno of anonymous mapping=%d",m.hblks);
+printf("\nsize of anonymous mapping=%d",m.hblkhd);
+printf("\nmaximum total allocated size=%d",m.usmblks);
+printf("\nsize of available fastbin=%d",m.fsmblks);
+printf("\nsize of total allocated space=%d",m.uordblks);
+printf("\nsize of available chunks=%d",m.fordblks);
+printf("\nsize of trimmable space=%d",m.keepcost);
+return 0;
+}
+
+compile and run
+
+Write a C program which creates two files. The first file should have read and write
+permission to owner, group of owner and other users whereas second file has read and write
+permission to owner(use umask() function). Now turn on group-id and turn off group execute
+permission of first file. Set the read permission to all user for second file (use chmod() function).
+
+
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<stdio.h>
+#include<sys/types.h>
+#include<stdlib.h>
+#include<string.h>
+int main()
+{
+        umask(0);
+        if(creat("file1",S_IRUSR|S_IWUSR|S_IWGRP|S_IROTH|S_IWOTH))
+                printf("create file1");
+        umask(S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+        if(creat("file2",S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH))
+                printf("\ncreate file2");
+        struct stat s;
+        if(stat("file1" ,&s)<0)
+                printf("\n stat error file1");
+        if(chmod("file1",(s.st_mode & ~S_IXGRP)|S_ISGID)<0)
+                printf("\n chmod error file 1");
+        if(chmod("file2",S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH)<0)
+                printf("\n chmod error file 2");
+return 0;
+}
+
+compile and run
+stat file1.c
+
+
+
+
+--------------------------------mt--------------------
+slip 11
+
+Write a Swift program to compute the sum of the two integers. If the values
+are equal return the triple their sum.
+func triple_sum(a: Int, b: Int) -> Int {
+if a == b
+{
+return (a + b) * 3
+}
+else{
+return a + b
+}
+}
+print(triple_sum(a: 1, b: 2))
+print(triple_sum(a: 3, b: 2))
+print(triple_sum(a: 2, b: 2))
+
+Construct an Android Application to accept a number and calculate Factorial and Sum of
+Digits of a given number using Menu
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<EditText android:layout_marginTop="200dp" android:layout_marginLeft="50dp"
+android:layout_width="200dp"
+android:layout_height="50dp"
+android:id="@+id/et"
+android:hint="Enter a number"/>
+</LinearLayout>
+
+xml 2nd
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:id="@+id/fact"
+android:title="Factorial" />
+<item android:id="@+id/sum"
+android:title="Sum" />
+</menu>
+
+java
+package com.example.datepicker;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Toast;
+public class MainActivity extends AppCompatActivity {
+int num;
+String value;
+EditText et;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+}
+@Override
+public boolean onCreateOptionsMenu(Menu menu) {
+//return super.onCreateOptionsMenu(menu);
+MenuInflater mi = getMenuInflater();
+mi.inflate(R.menu.menu, menu);
+return true;
+}
+@Override
+public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//return super.onOptionsItemSelected(item);
+et=(EditText) findViewById(R.id.et);
+value= et.getText().toString();
+if(!value.isEmpty()){
+try{
+num = Integer.parseInt(value);
+int id;
+id= item.getItemId();
+int t=num;
+switch(id){
+case R.id.fact:int fact=1;
+while(t>0){
+fact*=t;
+t--;
+}
+Toast.makeText(this, "Factorial="+fact, Toast.LENGTH_SHORT).show();
+break;
+case R.id.sum:int sum=0;while(t>0){
+sum+=t;
+t--;
+}
+Toast.makeText(this, "Sum="+sum, Toast.LENGTH_SHORT).show();
+break;
+}
+}
+catch (NumberFormatException ne){
+Log.e("Error", ""+ne.getMessage());
+}
+}
+return true;
+}
+}
+
+-------------------------------os------------------------------
+
+slip 11
+
+
+
+Write a C program to create variable length arrays using alloca() system call.
+
+
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<dirent.h>
+#include<string.h>
+#include<pwd.h>
+#include<grp.h>
+#include<time.h>
+#include<alloca.h>
+int main()
+{
+int **a;
+int r,c[20],i,j;
+printf("\n no of rows=> ");
+scanf("%d",&r);
+for(i=0;i<r;i++)
+{
+printf("Enter no of colums=>",i+1);
+scanf("%d",&c[i]);
+}
+a=(int**)alloca(sizeof(int)*r);
+for(i=0;i<r;i++)
+a[i]=(int*)alloca(sizeof(int)*c[i]);
+
+printf("\n ENTER ELEMENTS IN ARRAY=> ");
+for(i=0;i<r;i++)
+for(j=0;j<c[i];j++)
+{
+printf("\n ENTER ELEMENT OF a[%d][%d]=> ",i,j);
+scanf("%d",&a[i][j]);
+}
+printf("\n Element in Array=> ");
+for(i=0;i<r;i++)
+{
+printf("\n");
+for(j=0;j<c[i];j++)
+{
+printf("%d\t",a[i][j]);
+}
+}
+return 0;
+}
+
+compile and after ./a.out 2,2,3,1,2,3,4,5
+
+
+Write a C program that behaves like a shell (command interpreter). It has its own prompt say
+“NewShell$”. Any normal shell command is executed from your shell by starting a child process to
+execute the system program corresponding to the command. It should additionally interpret the
+following command.
+i)
+count c <filename> - print number of characters in file
+ii)
+count w <filename> - print number of words in file
+iii)
+count l <filename> - print number of lines in file
+
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<string.h>
+#include<dirent.h>
+void count(char ch,char *fn);
+int main()
+{
+char comm[80],t1[20],t2[20],t3[20],t4[20];
+int n;
+system("clear");
+while(1)
+{
+printf("MyShell$");
+fflush(stdin);
+fgets(comm,80,stdin);
+n=sscanf(comm,"%s%s%s%s",t1,t2,t3,t4);
+switch(n)
+{
+case 1:
+	if(!fork())
+	{
+	execlp(t1,t1,NULL);
+	perror(t1);
+	}
+	break;
+case 2:
+	if(!fork())
+	{
+	execlp(t1,t1,t2,NULL);
+	perror(t1);
+	}
+	break;
+case 3:
+	if(strcmp(t1,"count")==0)
+	  count(t2[0],t3);
+	if(!fork())
+	{
+	execlp(t1,t1,t2,t3,NULL);
+	perror(t1);
+	}
+	break;
+case 4:
+	if(!fork())
+	{
+	execlp(t1,t1,t2,t3,t4,NULL);
+	perror(t1);
+	}
+	break;
+}
+}
+return 0;
+}
+
+void count (char ch,char *fn)
+{
+int fd, w,l,c;
+w=0;
+l=0;
+c=0;
+char ch1;
+fd=open(fn,O_RDONLY);
+if(fd<0)
+{
+printf("unable to open file");
+exit(0);
+}
+
+while(read(fd,&ch1,1)!=0)
+{
+c++;
+if(ch1==' '||ch1=='\n')
+w++;
+if(ch1=='\n')
+l++;
+}
+close (fd);
+switch(ch)
+{
+case 'c':
+	printf("\nNo of character=%d",c);
+	break;
+case 'w':
+	printf("\nNo of word=%d",w);
+	break;
+case 'l':
+	printf("\nNo of lines=%d",l);
+	break;
+}
+}
+
+compile and run and when in shell
+count l filename
+count w filename
+count c filename
+
+
+
+
+
+
+
+
+----------------------mt--------------------------------
+
+slip 12
+
+Create an Android application, where the user can enter player name and points in one
+view and display it in another view.
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<EditText
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/et1"
+android:hint="Enter player name" />
+<EditText
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/et2"
+android:hint="Enter player's points" /><Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/b"
+android:text="SHOW"/>
+</LinearLayout>
+
+java file
+package com.example.myplayerintent;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+public class MainActivity extends AppCompatActivity {
+EditText et1, et2;
+Button b;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+et1 = (EditText) findViewById(R.id.et1);
+et2 = (EditText) findViewById(R.id.et2);
+b = (Button) findViewById(R.id.b);
+b.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+Intent i = new Intent(getApplicationContext(), newAct.class);
+i.putExtra("name", et1.getText().toString());
+i.putExtra("points", et2.getText().toString());
+startActivity(i);
+}
+});
+}
+}
+
+xml file 2nd
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".newAct">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/tv" />
+</LinearLayout>
+
+java file 2nd
+package com.example.myplayerintent;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.TextView;
+public class newAct extends AppCompatActivity {
+TextView tv;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_new);
+tv = (TextView) findViewById(R.id.tv);
+Intent i = getIntent();
+Bundle extras = i.getExtras();
+String name = extras.getString("name");
+String points = extras.getString("points");
+tv.setText(name + " " + points);
+}
+}
+------------------------os----------------------
+slip12
+Write a C program to send SIGALRM signal by child process to parent process and parent process
+make a provision to catch the signal and display alarm is fired.(Use Kill, fork, signal and sleep system
+call)
+
+#include<stdio.h>
+#include<signal.h>
+#include<unistd.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<fcntl.h>
+#include<stdlib.h>
+
+void sh(int n){
+    if(n==SIGALRM){
+        printf("\nAlarm is fired");
+        fflush(stdout);
+    }
+}
+
+int main(){
+    int n;
+    n = fork();
+    if(n==0){
+        printf("\nChild Process");
+        sleep(2);
+        printf("\nChild Sending SIGALRM");
+        fflush(stdout);
+        kill(getppid(),SIGALRM);
+        sleep(5);
+        printf("\nChild exist");
+        return 0;
+    }
+    else{
+        signal(SIGALRM,sh);
+        wait();
+        printf("\nParent exist");
+        return 0;
+    }
+    return 0;
+}
+
+compile and run
+
+
+Write a C program to display all the files from current directory and its subdirectory whose size is
+greater than ’n’ Bytes Where n is accepted from user through command line.
+
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<stdio.h>
+#include<sys/types.h>
+#include<stdlib.h>
+#include<time.h>
+#include<pwd.h>
+#include<string.h>
+#include<grp.h>
+#include<dirent.h>
+int main(int argc,char * argv[])
+{
+     
+        if(argc<2)
+        {
+                printf("\n enter the no of bytes\n");
+                exit(0);
+        }
+	char b[100];
+	int c=0,t=0,n,i,a;
+	char str[100];
+	char *str1,*str2;
+	 struct dirent *dir;
+	  struct stat s;
+	getcwd(b,100);
+	n=atoi(argv[1]);
+              DIR *dr = opendir(b);
+	if (dr == NULL)
+    	{
+        printf("Could not open current directory" );
+        return 0;
+    	}
+	while ((dir = readdir(dr)))
+	{	//printf("\nfilename:%s",dir->d_name);
+		strcpy(str,dir->d_name);
+       			stat(str,&s);
+
+			if(!(S_ISDIR(s.st_mode))&&((long)s.st_size>n))
+			{
+				printf("\n %s",str);
+			}
+
+	}
+
+}
+
+comile and run
+./a.out anysize example ./a.out 1000
+
+
+
+
+-----------------------mt--------------------------------
+
+slip 13
+
+Write a swift program to create a new string where all the character ‘a’ have
+been removed except first and last position.
+var str = "";
+print("Enter string:");
+str=readLine()!;
+let istart = str.index(after:str.startIndex);
+var firstletter = str[str.startIndex];
+let iend = str.index(before:str.endIndex);
+var lastletter = str[iend];
+print("Original string: ", str);
+let middleRange = istart ..< iend;
+var sub_string=str[istart ..< iend];
+sub_string.removeAll(where:{"a".contains($0)});
+var str1=String(firstletter);
+str1+=sub_string;
+str1+=String(lastletter);
+print("String: ", str1);
+
+
+Create table Company (id, name, address, phno). Create Android Application for performing
+the following operation on the table.(using sqlite database) i) Insert New Company Details.
+ii) Show All the Company Details
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<EditText android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/cid"
+android:hint="Enter company id" />
+<EditText
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/name"
+android:hint="Enter company name" />
+<EditText
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/address"
+android:hint="Enter company address" /><EditText
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/phno"
+android:hint="Enter company phone" />
+<Button
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/insert"
+android:text="INSERT" />
+<Button
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/save"
+android:text="SHOW" />
+<ListView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/lv" />
+</LinearLayout>
+
+java file
+package com.example.companydb;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
+import java.util.ArrayList;
+import java.util.List;
+public class MainActivity extends AppCompatActivity {
+Button insert, save;
+EditText et1, et2, et3, et4;
+ListView lv;
+@Override
+protected void onCreate(Bundle savedInstanceState) {super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+insert = (Button) findViewById(R.id.insert);
+save = (Button) findViewById(R.id.save);
+CompanyDB compdb = new CompanyDB(this, "Comapny.db", null, 1);
+insert.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+et1 = (EditText) findViewById(R.id.cid);
+et2 = (EditText) findViewById(R.id.name);
+et3 = (EditText) findViewById(R.id.address);
+et4 = (EditText) findViewById(R.id.phno);
+String cid = et1.getText().toString();
+String name = et2.getText().toString();
+String addr = et3.getText().toString();
+String phno = et4.getText().toString();
+long r = compdb.addDetails(cid, name, addr, phno);
+Toast.makeText(MainActivity.this, "Values inserted successfully",
+Toast.LENGTH_SHORT).show();
+}
+});
+save.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+lv= (ListView) findViewById(R.id.lv);
+ArrayList<Company> l = compdb.getDetails();
+ArrayAdapter aa = new ArrayAdapter<Company>(getApplicationContext(),
+android.R.layout.simple_list_item_1, l);
+lv.setAdapter(aa);
+}
+});
+}
+}
+package com.example.companydb;
+public class Company {
+String cid, name, addr, phno;
+public Company(String cid, String name, String addr, String phno){
+this.cid = cid;
+this.name = name;
+this.addr = addr;this.phno = phno;
+}
+public String getName(){
+return this.name;
+}
+public String getCid(){
+return this.cid;
+}
+public String getAddr(){
+return this.addr;
+}
+public String getPhno(){
+return this.phno;
+}
+}
+
+database file
+package com.example.companydb;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import java.util.ArrayList;
+public class CompanyDB extends SQLiteOpenHelper {
+String dbname = "Comapny.db";
+public CompanyDB(Context c, String dbname, SQLiteDatabase.CursorFactory cf, int
+version){
+super(c, dbname, null, 1);
+}
+@Override
+public void onCreate(SQLiteDatabase db){
+db.execSQL("create table company(id varchar(20), cname text, address text, phno
+char(10))");
+}
+public long addDetails(String cid, String name, String addr, String phno){
+ContentValues cv = new ContentValues();
+cv.put("id", cid);
+cv.put("cname", name);cv.put("address", addr);
+cv.put("phno", phno);
+SQLiteDatabase db = this.getWritableDatabase();
+long ret = db.insert("company", null, cv);
+return ret;
+}
+public ArrayList<Company> getDetails(){
+String sql = "select * from company";
+SQLiteDatabase db = getReadableDatabase();
+ArrayList<Company> clist = new ArrayList<Company>();
+Cursor c = db.rawQuery(sql, null);
+if(c.getCount()>0){
+c.moveToFirst();
+do{
+String cid = c.getString(0);
+String name = c.getString(1);
+String addr = c.getString(2);
+String phno = c.getString(3);
+Company c1 = new Company(cid, name, addr, phno);
+clist.add(c1);
+}while(c.moveToNext());
+}
+return clist;
+}
+@Override
+public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+}
+}
+
+
+------------------------------os-------------------
+slip 13
+
+
+Write a C program that redirects standard output to a file output.txt. (use of dup and open system
+call).
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+int main()
+{
+    int fd1,fd2;
+    fd1=open("output.txt",O_RDWR|O_CREAT|O_TRUNC,0666);
+    if(fd1<0)
+    {
+        printf("file creation error");
+        exit(0);
+    }
+    fd2=dup(1);
+    if(dup2(fd1,1)<0)
+    {
+        printf("\nunable to duplicate");
+        exit(0);
+    }
+    printf("1:pen\n");
+    printf("2:pencil\n");
+    close(fd1);
+    fflush(stdout);
+    dup2(fd2,1);
+    close(fd2);
+    printf("\nNormal output");
+    return 0;
+}
+
+
+just compile and run 
+after it open the output.txt file from ternmial cat output.txt or normal
+
+
+Write a C program that behaves like a shell (command interpreter). It has its own prompt say
+“NewShell$”. Any normal shell command is executed from your shell by starting a child process to
+execute the system program corresponding to the command. It should additionally interpret the
+following command.
+i)
+typeline +10 <filename> - print first 10 lines of file
+ii)
+typeline -20 <filename> - print last 20 lines of file
+iii)
+typeline a <filename> - print all lines of file
+
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+void make_toks(char *s, char *tok[]){
+    int i=0;
+    char *p;
+    p=strtok(s," ");
+    while(p!=NULL){
+        tok[i++]=p;
+        p=strtok(NULL," ");
+    }
+    tok[i]=NULL;
+}
+
+void typeline(char *fn,char *op){
+    int fh,i,j,n;
+    char c;
+    fh=open(fn,O_RDONLY);
+    if(fh==-1){
+        printf("File %s not found.\n",fn);
+        return;
+    }
+    if(strcmp(op,"a")==0){
+        while(read(fh,&c,1)>0){
+            printf("%c",c);
+        }
+        close(fh);
+        return;
+    }
+    n=atoi(op);
+    if(n>0){
+        i=0;
+        while(read(fh,&c,1)>0){
+            printf("%c",c);
+            if(c=='\n'){
+                i++;
+            }
+            if(i==n) break;
+        }
+    }
+    if(n<0){
+        i=0;
+        while(read(fh,&c,1)>0){
+            if(c=='\n') 
+            i++;        }
+        lseek(fh,0,SEEK_SET);
+        j=0;
+        while(read(fh,&c,1)>0){
+            if(c=='\n') j++;
+            if(j==i+n) break;
+        }
+        while(read(fh,&c,1)>0){
+            printf("%c",c);
+        }
+    }
+    close(fh);
+}
+int main(){
+    char buff[80],*args[10];
+    int pid;
+    while(1){
+        printf("myshell$");
+        fflush(stdin);
+        fgets(buff,80,stdin);
+        buff[strlen(buff)-1]='\0';
+        make_toks(buff,args);
+        if(strcmp(args[0],"typeline")==0){
+            typeline(args[2],args[1]);
+        }
+        else{
+            pid=fork();
+            if(pid>0){
+                wait();
+            }
+            else{
+                if(execvp(args[0],args)==-1){
+                    printf("Bad command.\n");
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+
+first create a file name b1.txt and in that type 1 to 10 press enter after each number and save it
+compile the program run using ./a.out
+then in shell type
+typeline +5 b1.txt
+typeline -5 b1.txt
+typeline a b1.txt
+
+
+
+
+
+
+----------------------mt---------------------------
+slip 14
+
+Construct an android application that toggle a light bulb on and off when the user clicks on
+toggle button
+xml file
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".MainActivity">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="16dp">
+<ToggleButton
+android:id="@+id/toggleButton"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_centerHorizontal="true"
+android:textOff="OFF"
+android:textOn="ON" />
+<ImageView
+android:id="@+id/imageView"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_below="@id/toggleButton"
+android:layout_centerHorizontal="true" />
+</RelativeLayout>
+</LinearLayout>
+
+java file
+package com.example.myapplication;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.ToggleButton;
+public class MainActivity extends AppCompatActivity {
+private ToggleButton toggleButton;
+private ImageView imageView;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+// Find views by their IDs
+toggleButton = findViewById(R.id.toggleButton);
+imageView = findViewById(R.id.imageView);
+// Set toggle button listener
+toggleButton.setOnCheckedChangeListener(new
+CompoundButton.OnCheckedChangeListener() {
+@Override
+public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+// Update image based on toggle button state
+if (isChecked) {
+imageView.setImageResource(R.drawable.ic_image_on);
+} else {
+imageView.setImageResource(R.drawable.ic_image_off);
+}
+}
+});
+}
+}
+
+Construct an Android application to accept a number and calculate Armstrong and Perfect
+number of a given number using Menu.
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<EditText
+android:layout_marginTop="200dp"
+android:layout_marginLeft="50dp"
+android:layout_width="200dp"
+android:layout_height="50dp"
+android:id="@+id/et"
+android:hint="Enter a number"/>
+</LinearLayout>
+
+menu file
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:id="@+id/perfect"
+android:title="Perfect" /><item android:id="@+id/arms"
+android:title="Armstrong" />
+</menu>
+
+java file
+package com.example.datepicker;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Toast;
+public class MainActivity extends AppCompatActivity {
+int num;
+String value;
+EditText et;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+}
+@Override
+public boolean onCreateOptionsMenu(Menu menu) {
+//return super.onCreateOptionsMenu(menu);
+MenuInflater mi = getMenuInflater();
+mi.inflate(R.menu.menu, menu);
+return true;
+}
+@Override
+public boolean onOptionsItemSelected(@NonNull MenuItem item) {//return super.onOptionsItemSelected(item);
+et=(EditText) findViewById(R.id.et);
+value= et.getText().toString();
+if(!value.isEmpty()){
+try{
+num = Integer.parseInt(value);
+int id;
+id= item.getItemId();
+int t=num;
+switch(id){
+case R.id.perfect:int ans=0;
+int div=1;
+while(div<t){
+if (t%div==0)
+ans=ans + div;
+div++;
+}
+if(ans==num)
+Toast.makeText(getApplicationContext(), "Number "+ num+ " is perfect",
+Toast.LENGTH_SHORT).show();
+else
+Toast.makeText(getApplicationContext(), "Number "+ num+ " is not perfect",
+Toast.LENGTH_SHORT).show();
+break;
+case R.id.arms:ans=0;
+while(t>0){
+int rem = t%10;
+ans += Math.pow(rem, 3);
+t=t/10;
+}
+if(ans==num)
+Toast.makeText(this, "Number "+ num + " is an armstrong number",
+Toast.LENGTH_SHORT).show();
+else
+Toast.makeText(this, "Number "+ num + " is not an armstrong number",
+Toast.LENGTH_SHORT).show();
+break;
+}
+}
+catch (NumberFormatException ne){
+Log.e("Error", ""+ne.getMessage());
+}
+return true;
+}}
+----------------------------------------os---------------
+slip 14
+
+Write a C program to create an unnamed pipe. Write following three messages to pipe and display it.
+Message1 = “Hello World”
+Message2 = “Hello SPPU”
+Message3 = “Linux is Funny”
+#include<stdio.h>
+#include<fcntl.h>
+#include<stdlib.h>
+int main()
+{
+ int p[2],i,n;
+ char buf[70];
+ char *m1="Message1 = Hello World";
+ char *m2="Message2 = Hello SPPU";
+ char *m3="Message3 = LINUX is Funny";
+	if(pipe(p)<0)
+	exit(0);
+n=fork();
+if(n==0)
+{
+	//printf("CHILD WRITTEN:\n");
+	write(p[1],m1,70);
+	write(p[1],m2,70);
+	write(p[1],m3,70);
+}
+	else{
+	printf("PARENT READS:\n");
+		for(i=0;i<3;i++)
+ 		{
+ 	 	read(p[0],buf,70);
+  		printf("%s\n",buf);
+ 		}
+	}
+return 0;
+}
+
+
+
+
+Write a C program that behaves like a shell (command interpreter). It has its own prompt say
+“NewShell$”.Any normal shell command is executed from your shell by starting a child process to
+execute the system program corresponding to the command. It should additionally interpret the
+following command.
+i)
+search f <pattern><filename> - search first occurrence of pattern in filename
+ii)
+search c <pattern><filename> - count no. of occurrences of pattern in filename
+iii)
+search a <pattern><filename> - search all occurrences of pattern in filename
+
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<string.h>
+#include<dirent.h>
+void search(char,char*,char*);
+int main()
+{
+char comm[80],t1[20],t2[20],t3[20],t4[20];
+int n;
+system("clear");
+while(1)
+{
+printf("MyShell$");
+fflush(stdin);
+fgets(comm,80,stdin);
+n=sscanf(comm,"%s%s%s%s",t1,t2,t3,t4);
+switch(n)
+{
+case 1:
+	if(!fork())
+	{
+	execlp(t1,t1,NULL);
+	perror(t1);
+	}
+	break;
+case 2:
+	if(!fork())
+	{
+	execlp(t1,t1,t2,NULL);
+	perror(t1);
+	}
+	break;
+case 3:
+	if(!fork())
+	{
+	execlp(t1,t1,t2,t3,NULL);
+	perror(t1);
+	}
+	break;
+case 4:
+	if(strcmp(t1,"search")==0)
+		  search(t2[0],t3,t4);
+	else
+	if(!fork())
+	{
+	execlp(t1,t1,t2,t3,t4,NULL);
+	perror(t1);
+	}
+	break;
+}
+}
+return 0;
+}
+
+void search(char opt,char *patt,char *fn)
+{
+int fd,i=1,j=0,cnt=0;
+char ch,buff[80],*p;
+fd=open(fn,O_RDONLY);
+if(fd<0)
+{
+printf("unable to open file");
+exit(0);
+}
+
+switch(opt)
+{
+case 'f':
+	while(read(fd,&ch,1)!=0)
+	{
+		if(ch=='\n')
+		{
+			buff[j]='\0';
+			j=0;
+			if(strstr(buff,patt)!=NULL)
+			{
+			printf("%d\t%s",i,buff);
+			break;
+			}
+		}
+		else
+		buff[j++]=ch;
+	}
+	close(fd);
+	break;
+case 'c':
+	while(read(fd,&ch,1)!=0)
+	{
+		if(ch=='\n')
+		{
+			buff[j]='\0';
+			j=0;
+			if(strstr(buff,patt)!=NULL)
+			{
+			p=buff;
+			while((p=strstr(p,patt))!=NULL)
+			{
+			cnt++;
+			p++;
+			}
+		   }
+		}
+		else
+		buff[j++]=ch;
+	}
+	printf("\nOccurances=>%d",cnt);
+	close(fd);
+	break;
+case 'a':
+		while(read(fd,&ch,1)!=0)
+	{
+		if(ch=='\n')
+		{
+			buff[j]='\0';
+			j=0;
+			if(strstr(buff,patt)!=NULL)
+			{
+			p=buff;
+			while((p=strstr(p,patt))!=NULL)
+			{
+			printf("\n%d\t%s",i,p);
+			i++;
+			p++;
+			}
+			}
+		}
+		else
+		buff[j++]=ch;
+	}
+	close(fd);
+	break;		
+}
+}
+
+create a file b12.txt
+write name of your 5 friends
+compile the program and run and in my shell
+search f name b12.txt
+search c name b12.txt
+search a name b12.txt
+
+
+
+
+-------------------------mt---------------------
+
+slip 15
+
+Write an android program to merge two list
+activity_main.xml
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"android:layout_width="match_parent"
+android:orientation="vertical"
+android:layout_height="match_parent"
+tools:context=".MainActivity">
+<LinearLayout
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="horizontal">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="List 1:"/>
+<EditText
+android:id="@+id/l1"
+android:layout_width="175dp"
+android:layout_height="wrap_content" />
+</LinearLayout>
+<LinearLayout
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="horizontal">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="List 2:"/>
+<EditText
+android:id="@+id/l2"
+android:layout_width="175dp"
+android:layout_height="wrap_content" />
+</LinearLayout>
+<LinearLayout
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="horizontal">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="List 3:"/>
+<EditText
+android:id="@+id/l3"
+android:layout_width="175dp"
+android:layout_height="wrap_content" />
+</LinearLayout>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Merge"
+android:id="@+id/btn"/>
+</LinearLayout>
+
+
+java file
+
+
+MainActivity.java
+package com.example.mergelist;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import java.util.ArrayList;
+import java.util.Arrays;
+public class MainActivity extends AppCompatActivity {
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+EditText l1 = (EditText) findViewById(R.id.l1);
+EditText l2 = (EditText) findViewById(R.id.l2);
+EditText l3 = (EditText) findViewById(R.id.l3);
+Button mergeBtn = (Button) findViewById(R.id.btn);
+mergeBtn.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+String[] list1 = l1.getText().toString().trim().split(",");
+ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(list1));
+String[] list2 = l2.getText().toString().trim().split(",");
+ArrayList<String> arrayList2 = new ArrayList<>(Arrays.asList(list2));
+ArrayList<String> mergedList = new ArrayList<>(arrayList);
+mergedList.addAll(arrayList2);
+StringBuilder sb = new StringBuilder();
+for (String item : mergedList) {
+sb.append(item).append(", ");
+}
+String result = sb.toString();
+l3.setText(result);
+}
+});
+}
+}
+
+
+
+Write an Android Application to send Email
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".MainActivity"><TableRow>
+<EditText
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/to"
+android:hint="to"/>
+</TableRow>
+<TableRow>
+<EditText
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/sub"
+android:hint="subject"/>
+</TableRow>
+<TableRow>
+<EditText
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/msg"
+android:inputType="textMultiLine"
+android:hint="Message"/>
+</TableRow>
+<TableRow>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/send"
+android:text="SEND"/>
+</TableRow>
+</TableLayout>
+
+java file
+package com.example.myemail;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;import android.widget.Button;
+import android.widget.EditText;
+public class MainActivity extends AppCompatActivity {
+EditText to, sub, msg;
+Button send;
+String toStr, subStr, msgStr;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+to=(EditText) findViewById(R.id.to);
+sub=(EditText) findViewById(R.id.sub);
+msg=(EditText) findViewById(R.id.msg);
+send = (Button) findViewById(R.id.send);
+send.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+toStr = to.getText().toString();
+subStr = sub.getText().toString();
+msgStr = msg.getText().toString();
+Intent email = new Intent(Intent.ACTION_SEND);
+email.putExtra(Intent.EXTRA_EMAIL, new String[] {toStr});
+email.putExtra(Intent.EXTRA_SUBJECT, subStr);
+email.putExtra(Intent.EXTRA_TEXT, msgStr);
+email.setType("message/rfc822");
+startActivity(Intent.createChooser(email, "Choose an email client"));
+}
+});
+}
+}
+
+
+---------------------------os-------------------------------
+
+slip 15
+
+Write a C program to Identify the type (Directory, character device, Block device, Regular file, FIFO
+or pipe, symbolic link or socket) of given file using stat() system call.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<dirent.h>
+#include<string.h>
+#include<pwd.h>
+#include<grp.h>
+#include<time.h>
+int main(int args, char *argv[])
+{
+    struct stat s;
+    struct passwd *ps;
+    struct group *gs;
+    char t[50];
+
+    if(args<2){
+        printf("No file name found");
+        exit(0);
+    }
+
+    stat(argv[1], &s);
+    printf("\n");
+
+    if(S_ISREG(s.st_mode)){
+        printf("\n it is Regular file");
+    }
+    if(S_ISDIR(s.st_mode)){
+        printf("\n it is directory");
+    }
+    if(S_ISCHR(s.st_mode)){
+        printf("\n it is charcter file");
+    }
+    if(S_ISFIFO(s.st_mode)){
+        printf("\n it is fifo /pipe");
+    }
+    if(S_ISBLK(s.st_mode)){
+        printf("\nit is Block file");
+    }
+    if(S_ISLNK(s.st_mode)){
+        printf("\n it is symbolic link");
+    }
+    if(S_ISSOCK(s.st_mode)){
+        printf("\n it is socket file");
+    }
+    return 0;
+}
+
+compile and run
+./a.out foldername
+next time 
+./a.out filename
+
+
+Write a C program which creates a child process and child process catches a signal SIGHUP,
+SIGINT and SIGQUIT. The Parent process send a SIGHUP or SIGINT signal after every 3 seconds, at
+the end of 15 second parent send SIGQUIT signal to child and child terminates by displaying message
+"My Papa has Killed me!!!”.
+
+#include<stdio.h>
+#include<signal.h>
+#include<unistd.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<fcntl.h>
+#include<stdlib.h>
+ void sh(){
+        printf("\nSIGINT is caught");
+    signal(SIGINT, sh);   
+}
+void sh2(){
+printf("\nSIGHUP is caught");
+signal(SIGHUP, sh2);
+}
+
+void sh3(){
+printf("\nMy papa has killed me");
+
+        exit(0);
+}     
+
+int main(){
+    int n=fork();
+    if(n==0){
+        signal(SIGINT, sh);
+        signal(SIGHUP,sh2);
+        signal(SIGQUIT,sh3);
+        while(1){
+
+        }
+    }
+    else{
+        sleep(3);
+        kill(n,SIGINT);
+        sleep(3);
+        kill(n,SIGHUP);
+        sleep(3);
+        kill(n,SIGINT);
+        sleep(3);
+        kill(n,SIGHUP);
+        sleep(3);
+        kill(n,SIGINT);
+        sleep(3);
+
+        kill(n,SIGQUIT);
+        exit(0);
+    }
+    return 0;
+}
+
+compile and run automaitcally it will run
+
+
+
+
+
+-----------------------------------mt--------------------------
+
+slip 16
+
+Write an android program to display hello message using intent
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<Button
+android:id="@+id/btn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Send Hello!"
+android:textSize="20dp"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintLeft_toLeftOf="parent"
+app:layout_constraintRight_toRightOf="parent"
+app:layout_constraintTop_toTopOf="parent" />
+</LinearLayout>
+
+java file 
+package com.example.myintent;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;import android.view.View;
+import android.widget.Button;
+public class MainActivity extends AppCompatActivity {
+Button btn;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+btn = (Button) findViewById(R.id.btn);
+btn.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+Intent i = new Intent(getApplicationContext(), SecActivityActivi.class);
+i.putExtra("hello", "Hello!");
+startActivity(i);
+}
+});
+}
+}
+xml file 2
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".SecActivityActivi">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/text"
+android:textSize="20dp"/>
+</LinearLayout>
+
+java file 2
+package com.example.myintent;
+import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.TextView;public class SecActivityActivi extends AppCompatActivity {
+TextView tv;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.secactivity);
+tv= (TextView) findViewById(R.id.text);
+Intent i = getIntent();
+String str = i.getStringExtra("hello");
+tv.setText(str);
+}
+}
+
+Create an Android application which will ask the user to input his name and a message,
+display the two items concatenated in a label, and change the format of the label using
+radio buttons and check boxes for selection, the user can make the label text bold,
+underlined or italic and change its color .include buttons to display the message in the
+label, clear the text boxes and label and then exit
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<LinearLayout
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="horizontal">
+<EditText
+android:layout_width="150dp"
+android:layout_height="50dp"
+android:id="@+id/et1" />
+<EditText
+android:layout_width="150dp"
+android:layout_height="50dp"
+android:id="@+id/et2" />
+</LinearLayout>
+<LinearLayout
+android:layout_width="wrap_content"android:layout_height="wrap_content"
+android:orientation="vertical">
+<TextView
+android:layout_width="200dp"
+android:layout_height="50dp"
+android:id="@+id/tv" />
+</LinearLayout>
+<LinearLayout
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="vertical">
+<RadioButton
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/rb1"
+android:text="Change Text Size" />
+<RadioButton
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/rb2"
+android:text="Change Font Style" />
+<CheckBox
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/cb1"
+android:text="Bold" />
+<CheckBox
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/cb2"
+android:text="Italic" />
+<CheckBox
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/cb3"
+android:text="Underline" />
+<RadioButton
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/rb3"android:text="Change Text Color" />
+</LinearLayout>
+<LinearLayout
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="horizontal">
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/b1"
+android:text="FORMAT" />
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/b2"
+android:text="CLEAR" />
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/b3"
+android:text="EXIT" />
+</LinearLayout>
+</LinearLayout>
+
+
+java file
+package com.example.mytextformat;
+import androidx.appcompat.app.AppCompatActivity;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.TextView;
+public class MainActivity extends AppCompatActivity {
+EditText et1, et2;
+TextView tv;
+String s1,s2, s3;RadioButton rb1, rb2, rb3;
+CheckBox cb1, cb2, cb3;
+Button b1, b2, b3;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+rb1 = (RadioButton) findViewById(R.id.rb1);
+rb2 = (RadioButton) findViewById(R.id.rb2);
+rb3= (RadioButton) findViewById(R.id.rb3);
+cb1 = (CheckBox) findViewById(R.id.cb1);
+cb2 = (CheckBox) findViewById(R.id.cb2);
+cb3 = (CheckBox) findViewById(R.id.cb3);
+b1 = (Button) findViewById(R.id.b1);
+b2 = (Button) findViewById(R.id.b2);
+b3 = (Button) findViewById(R.id.b3);
+b1.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+et1 = (EditText) findViewById(R.id.et1);
+et2 = (EditText) findViewById(R.id.et2);
+tv= (TextView) findViewById(R.id.tv);
+s1 = et1.getText().toString();
+s2 = et2.getText().toString();
+s3 = s1 + s2;
+tv.setText(s3);
+if(rb1.isChecked()){
+tv.setTextSize(40);
+}
+if(rb2.isChecked()){
+if(cb1.isChecked())
+tv.setTypeface(null, Typeface.BOLD);
+if(cb2.isChecked())
+tv.setTypeface(null, Typeface.ITALIC);
+if(cb3.isChecked())
+tv.setPaintFlags(tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+}
+if(rb3.isChecked()){
+tv.setTextColor(getResources().getColor(R.color.teal_700));
+}
+}
+});b2.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+tv.setText("");
+et1.setText("");
+et2.setText("");
+}
+});
+b3.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+System.exit(1);
+}
+});
+}
+}
+----------------------------os---------------------------
+
+slip 16
+
+Write a C program that catches the ctrl-c (SIGINT) signal for the first time and display the
+appropriate message and exits on pressing ctrl-c again.
+
+
+#include<stdio.h>
+#include<signal.h>
+void sh(int);
+
+int main()
+{
+signal(SIGINT,sh);
+while(1)
+{
+}
+return 0;
+}
+
+void sh(int n)
+{
+if(n==SIGINT)
+{
+printf("\nctl+c cought");
+fflush(stdout);
+signal(SIGINT,SIG_DFL);
+}
+}
+
+compile and run
+
+press cntrl+c
+again press cntrl+c
+
+
+
+Write a C program to implement the following unix/linux command on current directory
+ls –l > output.txt
+DO NOT simply exec ls -l > output.txt or system command from the program.
+
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<dirent.h>
+#include<string.h>
+#include<signal.h>
+int main()
+{
+    int pid=fork();
+    int fd=creat("output.txt",0777);
+    if(pid!=0 &&pid!=-1)
+    {
+        close(1);
+        dup(fd);
+        execlp("ls","ls","-l",NULL);
+        close(fd);
+    }
+    return 0;
+}
+
+
+simple compile and run the program and after that open the ouput.txt file in pc thats the answer
+
+
+
+
+
+
+
+------------------------------mt----------------------------
+slip 17
+
+Swift program for factorial of a number
+var number, fact: Int
+number = 6
+fact = 1
+for n in 1…number {fact = fact * n
+}
+print(fact)
+
+Write a PhoneGap application to display Hello World using html5Html file
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Security-Policy" content="default-src
+'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self'
+'unsafe-inline'; media-src *">
+<meta name="format-detection" content="telephone=no">
+<meta name="msapplication-tap-highlight" content="no">
+<meta name="viewport" content="user-scalable=no, initial-scale=1,
+maximum-scale=1, minimum-scale=1, width=device-width">
+<title>Cordova Hello World App</title>
+<style>
+/* Div at Center of the screen */
+#myDiv{
+position: absolute;
+top: 50%;
+left: 50%;
+margin-top: -50px;
+margin-left: -50px;
+width: 100px;
+height: 100px;
+}
+</style>
+</head>
+<body>
+<div>
+<h1>Apache Cordova Hello World</h1>
+<div id="myDiv">
+<p> Hello World at Center of the Mobile Screen</p>
+</div>
+</div>
+</body>
+</html>
+
+
+--------------------------os------------------------
+slip 17
+
+Write a C program to display the given message ‘n’ times. (make a use of setjmp and longjmp system
+call)
+
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<setjmp.h>
+static jmp_buf jmp;
+int main()
+{
+char *s;
+int n;
+int cnt=0;
+printf("\nEnter message=>");
+gets(s);
+printf("\nenter n values=>");
+scanf("%d",&n);
+setjmp(jmp);
+printf("\n%s",s);
+cnt++;
+if(cnt<n)
+longjmp(jmp,1);
+return 0;
+}
+
+compiile and run
+enter any message and how many times print
+
+
+
+Write a C program to display all the files from current directory which are created in a
+particular month.
+
+
+
+#include<sys/stat.h>
+#include<fcntl.h>
+#include<stdio.h>
+#include<sys/types.h>
+#include<stdlib.h>
+#include<time.h>
+#include<pwd.h>
+#include<string.h>
+#include<grp.h>
+#include<dirent.h>
+void main()
+{
+	char b[100];
+	 struct stat s;
+        char month[10];
+        char *t1,m[50];
+        getcwd(b,100);
+        printf("\n enter month :");
+        gets(m);
+	struct dirent *dir;
+	getcwd(b,100);
+           DIR *dr = opendir(b);
+	if (dr == NULL)
+    	{
+        printf("Could not open current directory" );
+        return 0;
+    	}
+	while ((dir = readdir(dr)))
+	{
+		 stat(dir->d_name,&s);
+                t1=ctime(&s.st_ctime);
+                if(strstr(t1,m))
+		{
+		printf("\nfilename:%s",dir->d_name);
+		}
+	}
+}
+
+
+compile and run
+eg after ./a.out
+type Jan
+displays all file in jan to cross check type ls -l
+
+
+
+----------------------------mt----------------------------
+
+slip 18
+
+
+
+
+------------------------------os----------------------------
+
+slip 18
+
+Write a C program to display the last access and modified time of a given file.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<string.h>
+#include<time.h>
+int main(int argc,char *argv[])
+{
+char s[100],t1[100],t2[100];
+struct stat s1,s2;
+printf("\nEnter file name=>");
+gets(s);
+stat(s,&s1);
+strcpy(t1,ctime(&s1.st_atim));
+strcpy(t2,ctime(&s1.st_mtim));
+printf("\nAccess time=>%s",t1);
+printf("\nmodification time=>%s",t2);
+return 0;
+}
+
+simple compile and run
+
+Write a C program to implement the following unix/linux command (use fork, pipe and exec system
+call). Your program should block the signal Ctrl-C and Ctrl-\ signal during the execution.
+ls –l | wc –l
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<signal.h>
+#include<unistd.h>
+void sh(int);
+int main()
+{
+int fd[2],n;
+pipe(fd);
+signal(SIGQUIT,sh);
+signal(SIGINT,sh);
+n=fork();
+if(n==0)
+{
+close (fd[0]);
+close(1);
+dup(fd[1]);
+close(fd[1]);
+execlp("ls","ls","-l",NULL);
+}
+else
+{
+wait();
+sleep(20);
+close (fd[1]);
+close(0);
+dup(fd[0]);
+close(fd[0]);
+execlp("wc","wc","-l",NULL);
+}
+return 0;
+}
+void sh(int n)
+{
+if(n==SIGQUIT)
+	printf("\n ctl+\\ cought");
+if(n==SIGINT)
+	printf("\n ctl+c cought");
+fflush(stdout);
+}
+compile run
+press cntrl+c
+again run
+press cntrl+\
+again compile run wait till exit
+
+now match the no which comes
+cross check type ls -l|wc -l
+
+
+
+
+----------------------------mt--------------------------
+
+slip 19
+
+
+Create an Android Application that will change color of the screen and change the font size
+of text view using xml
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Welcome!"
+android:id="@+id/tv"
+/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/btn"
+android:text="Change text size and background color" />
+</LinearLayout>
+
+java file
+package com.example.mychangebackground;
+import androidx.appcompat.app.AppCompatActivity;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+public class MainActivity extends AppCompatActivity {
+Button btn;
+TextView tv;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+btn = (Button) findViewById(R.id.btn);
+tv = (TextView) findViewById(R.id.tv);
+btn.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+tv.setTextSize(30);changeScreenColor(Color.RED);
+}
+});
+}
+public void changeScreenColor(int c){
+View v = this.getWindow().getDecorView();
+v.setBackgroundColor(c);
+}
+}
+
+
+Create table Project(id,name,dept,city). Create Application to perform the following
+operations.(usingsqlite database) i) Add records. ii) Display all the records.
+
+java file
+package com.example.myprojectdb;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;import android.widget.Toast;
+import java.util.ArrayList;
+public class MainActivity extends AppCompatActivity {
+Button insert, show;
+ListView lv;
+EditText et1, et2, et3, et4;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+insert = (Button) findViewById(R.id.insert);
+show = (Button) findViewById(R.id.save);
+ProjectDB projdb = new ProjectDB(this, "Project.db", null, 1);
+insert.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+et1 = (EditText) findViewById(R.id.pid);
+et2 = (EditText) findViewById(R.id.name);
+et3 = (EditText) findViewById(R.id.dept);
+et4 = (EditText) findViewById(R.id.city);
+String pid = et1.getText().toString();
+String pname =et2.getText().toString();
+String dept = et3.getText().toString();
+String city = et4.getText().toString();
+long r= projdb.addDetails(pid, pname, dept, city);
+if(r>0){
+Toast.makeText(MainActivity.this, "Values inserted successfully",
+Toast.LENGTH_SHORT).show();
+}
+}
+});
+show.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+lv = (ListView) findViewById(R.id.lv);
+ArrayList<Project> l = projdb.getDetails();
+ArrayAdapter aa = new ArrayAdapter(getApplicationContext(),
+android.R.layout.simple_list_item_1, l);
+lv.setAdapter(aa);
+}
+});}
+}
+package com.example.myprojectdb;
+public class Project {
+String pid, pname, dept, city;
+public Project(String pid, String name, String dept, String city){
+this.pid = pid;
+this.pname = name;
+this.dept = dept;
+this.city = city;
+}
+public String getPid(){
+return this.pid;
+}
+public String getPname(){
+return this.pname;
+}
+public String getDept(){
+return this.dept;
+}
+public String getCity(){
+return this.city;
+}
+}
+
+database file
+package com.example.myprojectdb;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import java.util.ArrayList;
+public class ProjectDB extends SQLiteOpenHelper {
+public ProjectDB(Context c, String dbname, SQLiteDatabase.CursorFactory cf, int v){super(c, dbname, cf, v);
+}
+@Override
+public void onCreate(SQLiteDatabase db) {
+db.execSQL("create table project(pid varchar(30), pname text, dept text, city text)");
+}
+long addDetails(String pid, String pname, String dept, String city){
+ContentValues cv = new ContentValues();
+cv.put("pid", pid);
+cv.put("pname", pname);
+cv.put("dept", dept);
+cv.put("city", city);
+SQLiteDatabase db = getWritableDatabase();
+long ret = db.insert("project", null, cv);
+return ret;
+}
+ArrayList<Project> getDetails(){
+String sql = "select * from project";
+SQLiteDatabase db = getReadableDatabase();
+ArrayList<Project> plist = new ArrayList<Project>();
+Cursor c = db.rawQuery(sql, null);
+if(c.getCount()>0){
+c.moveToFirst();
+do{
+String pid = c.getString(0);
+String pname = c.getString(1);
+String dept = c.getString(2);
+String city = c.getString(3);
+Project p1 = new Project(pid, pname, dept, city);
+plist.add(p1);
+}while(c.moveToNext());
+}
+return plist;
+}
+@Override
+public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+}
+}
+
+xml file
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<EditText
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/pid"
+android:hint="Enter project id" />
+<EditText
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/name"
+android:hint="Enter project name" />
+<EditText
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/dept"
+android:hint="Enter project department" />
+<EditText
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/city"
+android:hint="Enter project city" />
+<Button
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/insert"
+android:text="INSERT" />
+<Button
+android:layout_width="match_parent"
+android:layout_height="50dp"
+android:id="@+id/save"
+android:text="SHOW" />
+<ListView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/lv" /></LinearLayout>
+
+
+
+---------------------------os----------------------------
+
+slip 19
+Write a C program to move the content of file1.txt to file2.txt and remove the file1.txt from directory.
+
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<string.h>
+#include<time.h>
+int main(int argc,char *argv[])
+{
+char *s;
+struct stat s1;
+int fd1,fd2;
+fd1=open("y1.txt",O_RDONLY);
+fd2=open("y4.txt",O_WRONLY|O_CREAT|O_TRUNC,0777);
+fstat(fd1,&s1);
+s=(char*)malloc(sizeof(char)*s1.st_size);
+read(fd1,s,s1.st_size);
+write(fd2,s,s1.st_size);
+close(fd1);
+close(fd2);
+if(unlink("y1.txt")<0)
+printf("\n unsuccessful unlink");
+else
+printf("\nSuccessful");
+return 0;
+}
+
+create a file y1.txt first add some info like your name and save it
+then compile the program and run
+now open the y4.txt file the content will be copied and the y1.txt will be deleted
+
+
+
+Write a C program which creates a child process to run linux/ unix command or any user
+defined program. The parent process set the signal handler for death of child signal and Alarm
+signal. If a child process does not complete its execution in 5 second then parent process kills
+child process.
+
+#include<stdio.h>
+#include<unistd.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<dirent.h>
+#include<string.h>
+#include<signal.h>
+void sh(int signo)
+{
+    printf("\n child process is being killed by parent");
+    exit(0);
+}
+int main()
+{
+  int n;
+  signal(SIGCHLD,sh);
+  n=fork();
+  if(n==0)
+  {
+  execlp("ls","ls","-l",NULL);
+  }
+  else
+  {
+      sleep(5);
+      printf("\nchild has exceed time");
+      kill(n,SIGINT);
+  }
+  return 0;
+}
+simple compile and run
+
+
+
+
+
+-------------------------------------mt--------------------------
+slip 20
+
+Write an Android application to accept two numbers from the user, and displays them, but
+reject input if both numbers are greater than 10 and asks for two new numbers
+
+java file
+package com.example.mynumberaccept;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.text.Editable;
+import android.util.Log;import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+public class MainActivity extends AppCompatActivity {
+Button b;
+TextView tv;
+EditText et1, et2;
+int n1, n2;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+b = (Button) findViewById(R.id.b);
+tv = (TextView) findViewById(R.id.tv);
+b.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+et1 = (EditText) findViewById(R.id.et1);
+et2 = (EditText) findViewById(R.id.et2);
+String num1 = et1.getText().toString();
+String num2= et2.getText().toString();
+try{
+n1 = Integer.parseInt(num1);
+n2 = Integer.parseInt(num2);
+if(n1>10 && n2>10){
+Toast.makeText(MainActivity.this, "Please enter 2 new numbers",
+Toast.LENGTH_SHORT).show();
+}
+else{
+tv.setText(num1 + " " + num2);
+}
+}
+catch (NumberFormatException ne){
+Log.d("error", "error");
+}
+}
+});
+}
+}
+
+xml file
+<?xml version="1.0" encoding="utf-8"?><LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+tools:context=".MainActivity">
+<EditText
+android:layout_width="150dp"
+android:layout_height="50dp"
+android:id="@+id/et1"
+android:hint="enter first number" />
+<EditText
+android:layout_width="150dp"
+android:layout_height="50dp"
+android:id="@+id/et2"
+android:hint="enter second number" />
+<TextView
+android:layout_width="150dp"
+android:layout_height="50dp"
+android:id="@+id/tv" />
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="SHOW"
+android:id="@+id/b" />
+</LinearLayout>
+
+
+
+Create the simple calculator shown below also perform appropriate operation
+xml
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".MainActivity">
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:orientation="vertical">
+<EditText
+android:layout_width="match_parent" android:layout_height="wrap_content"
+android:id="@+id/et"/>
+</LinearLayout>
+<TableRow>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button1"
+android:text="1"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button2"
+android:text="2"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button3"
+android:text="3"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/addition"
+android:text="+"/>
+</TableRow>
+<TableRow>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button4"
+android:text="4"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button5"
+android:text="5"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button6"
+android:text="6"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/subtraction"
+android:text="-"/>
+</TableRow>
+<TableRow>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button7"
+android:text="7"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button8"
+android:text="8"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content" android:id="@+id/button9"
+android:text="9"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/multiplication"
+android:text="*"/>
+</TableRow>
+<TableRow>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/buttondot"
+android:text="."/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button0"
+android:text="0"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/buttonClear"
+android:text="C"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/division"
+android:text="/"/>
+</TableRow>
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:orientation="vertical">
+<Button
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:id="@+id/buttonEqual"
+android:text="="/>
+</LinearLayout>
+</TableLayout>
+
+
+
+
+java
+package com.example.calculator;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+public class MainActivity extends AppCompatActivity {boolean fPlus = false;
+boolean fSub = false;
+boolean fDiv = false;
+boolean fMul = false;
+float val1 = 0;
+float val2 = 0;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+EditText e = (EditText) findViewById(R.id.et);
+Button b1 = (Button) findViewById(R.id.button1);
+Button b2 = (Button) findViewById(R.id.button2);
+Button b3 = (Button) findViewById(R.id.button3);
+Button b4 = (Button) findViewById(R.id.button4);
+Button b5 = (Button) findViewById(R.id.button5);
+Button b6 = (Button) findViewById(R.id.button6);
+Button b7 = (Button) findViewById(R.id.button7);
+Button b8 = (Button) findViewById(R.id.button8);
+Button b9 = (Button) findViewById(R.id.button9);
+Button b0 = (Button) findViewById(R.id.button0);
+Button bClear = (Button) findViewById(R.id.buttonClear);
+Button plus = (Button) findViewById(R.id.addition);
+Button minus = (Button) findViewById(R.id.subtraction);
+Button mul = (Button) findViewById(R.id.multiplication);
+Button div = (Button) findViewById(R.id.division);
+Button dot = (Button) findViewById(R.id.buttondot);
+Button equal = (Button) findViewById(R.id.buttonEqual);
+b1.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "1");
+}
+});
+b2.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "2");
+}
+});
+b3.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "3");
+}
+});
+b4.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "4");
+}
+});
+b5.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "5");}
+});
+b6.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "6");
+}
+});
+b7.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "7");
+}
+});
+b8.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "8");
+}
+});
+b9.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "9");
+}
+});
+b0.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText() + "0");
+}
+});
+bClear.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText("");
+}
+});
+dot.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+e.setText(e.getText()+".");
+}
+});
+plus.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+String num = e.getText().toString();
+val1 = Float.parseFloat(num);
+e.setText(" ");
+fPlus = true;
+}
+});
+minus.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+String num = e.getText().toString();
+val1 = Float.parseFloat(num);e.setText(" ");
+fSub = true;
+}
+});
+mul.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+String num = e.getText().toString();
+val1 = Float.parseFloat(num);
+e.setText(" ");
+fMul = true;
+}
+});
+div.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+String num = e.getText().toString();
+val1 = Float.parseFloat(num);
+e.setText(" ");
+fDiv = true;
+}
+});
+equal.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+String num2 = e.getText().toString();
+val2 = Float.parseFloat(num2);
+if(fPlus){
+float r = val1 + val2;
+fPlus = false;
+e.setText("" + r);
+}
+if(fSub){
+float r = val1 - val2;
+fSub = false;
+e.setText("" + r);
+}
+if(fMul){
+float r = val1 * val2;
+fMul = false;
+e.setText("" + r);
+}
+if(fDiv){
+float r = val1 / val2;
+fDiv = false;
+e.setText("" + r);
+}
+}
+});
+}
+}
+-------------------------os----------------------
+
+slip 20
+
+Write a C program that print the exit status of a terminated child process.
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<fcntl.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<sys/wait.h>
+int main()
+{
+int n,s;
+n=fork();
+if(n==0)
+{
+execlp("date","date",NULL);
+}
+else
+{
+waitpid(n,&s,WNOHANG);
+if(WIFEXITED(s))
+{
+printf("exit status=>%d",WEXITSTATUS(s));
+}
+}
+return 0;
+}
+
+simple compile and run
+
+backup code for above program
+// C code to find the exit status of child process
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+// Driver code
+int main(void)
+{
+	pid_t pid = fork();
+	
+	if ( pid == 0 )
+	{
+	/* The pathname of the file passed to execl()
+		is not defined */
+	execl("/bin/sh", "bin/sh", "-c", "./nopath", "NULL");
+	}
+
+	int status;
+	
+	waitpid(pid, &status, 0);
+
+	if ( WIFEXITED(status) )
+	{
+		int exit_status = WEXITSTATUS(status);	
+		printf("Exit status of the child was %d\n",
+									exit_status);
+	}
+	return 0;
+}
+
+
+
+
+
+Write a C program that will read a directory containing a set of files, create a new sub directory
+called “backup” in same directory and copy all the files from directory to the new sub directory
+“backup”. You are supposed to use exec() with “cp” command. ( Create child processes that can execute
+each of the cp commands to copy the file from directory to subdirectory “backup”)
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Usage: %s <directory>\n", argv[0]);
+        exit(1);
+    }
+
+    DIR *dir;
+    struct dirent *ent;
+    struct stat st;
+    char src_path[512];
+    char dest_path[512];
+
+    // Open the directory
+    dir = opendir(argv[1]);
+    if (dir == NULL) {
+        perror("opendir failed");
+        exit(1);
+    }
+
+    // Create the backup directory
+    sprintf(dest_path, "%s/backup", argv[1]);
+    if (mkdir(dest_path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+        perror("mkdir failed");
+        exit(1);
+    }
+
+    // Traverse the directory
+    while ((ent = readdir(dir)) != NULL) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+            continue;
+        }
+
+        sprintf(src_path, "%s/%s", argv[1], ent->d_name);
+        sprintf(dest_path, "%s/backup/%s", argv[1], ent->d_name);
+
+        // Copy the file using exec() and cp command
+        pid_t pid = fork();
+        if (pid == -1) {
+            perror("fork failed");
+            exit(1);
+        } else if (pid == 0) {
+            execl("/bin/cp", "cp", src_path, dest_path, NULL);
+            exit(0);
+        }
+    }
+
+    closedir(dir);
+    return 0;
+}
+
+
+create a folder and save a text file in it any name
+now compile the program and run
+./a.out name of the folder eg ./a.out xyz this will create a backup folder in the folder you created
+
+
+
+
+
+
